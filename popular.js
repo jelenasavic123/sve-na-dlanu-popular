@@ -4,9 +4,18 @@
 
    PRAVI:
 
-   1. POPULARNO ODUVEK       - TOP 10
-   2. NAJGLEDANIJE 30 DANA   - TOP 10
-   3. NAJPOSECENIJE DANAS    - TOP 10
+   1. popularnoOduvek
+      Najgledanije od pocetka GA4 merenja
+
+   2. popularno30Dana
+      Najgledanije poslednjih 30 dana
+
+   3. popularnoDanas
+      Najgledanije danas
+
+   SVE SE CUVA U:
+
+   popular.json
 
    DETALJNA PROVERA:
 
@@ -14,14 +23,15 @@
    2. JSON je validan
    3. client_email postoji
    4. private_key postoji
-   5. private_key ima ispravan PEM
-   6. Google autentikacija radi
-   7. OAuth token radi
-   8. GA4 Data API radi
-   9. Service Account ima pristup Property-ju
-   10. Ucitava podatke
-   11. Pravi popular.json
-
+   5. private_key format
+   6. Google autentikacija
+   7. OAuth token
+   8. GA4 Data API
+   9. GA4 Property pristup
+   10. Oduvek podaci
+   11. 30 dana podaci
+   12. Danasnji podaci
+   13. Pravi popular.json
 ========================================================= */
 
 const fs = require("fs");
@@ -43,10 +53,8 @@ const {
 const PROPERTY_ID =
     "549759235";
 
-
 const TOP_LIMIT =
     10;
-
 
 const OUTPUT_FILE =
     path.join(
@@ -54,13 +62,8 @@ const OUTPUT_FILE =
         "popular.json"
     );
 
-
 const TIME_ZONE =
     "Europe/Belgrade";
-
-
-const GOOGLE_ANALYTICS_SCOPE =
-    "https://www.googleapis.com/auth/analytics.readonly";
 
 
 /* =========================================================
@@ -81,7 +84,6 @@ function section(
 ) {
 
     console.log("");
-
     separator();
 
     console.log(
@@ -129,7 +131,6 @@ function maskEmail(
 
     const name =
         parts[0];
-
 
     const domain =
         parts[1];
@@ -253,20 +254,19 @@ function getCredentials() {
        TYPE
     ===================================================== */
 
-    console.log(
-        "type:",
-        credentials.type ||
-        "(nema)"
-    );
-
-
     if (
-        credentials.type !==
-        "service_account"
+        credentials.type
     ) {
 
+        console.log(
+            "type:",
+            credentials.type
+        );
+
+    } else {
+
         console.warn(
-            "⚠️ type nije service_account."
+            "⚠️ type nije pronadjen."
         );
 
     }
@@ -276,11 +276,22 @@ function getCredentials() {
        PROJECT ID
     ===================================================== */
 
-    console.log(
-        "project_id:",
-        credentials.project_id ||
-        "(nema)"
-    );
+    if (
+        credentials.project_id
+    ) {
+
+        console.log(
+            "project_id:",
+            credentials.project_id
+        );
+
+    } else {
+
+        console.warn(
+            "⚠️ project_id nije pronadjen."
+        );
+
+    }
 
 
     /* =====================================================
@@ -442,7 +453,7 @@ function getCredentials() {
 
 
 /* =========================================================
-   PROVERA GOOGLE PRIVATE KEY
+   GOOGLE AUTH
 ========================================================= */
 
 function testPrivateKey(
@@ -470,9 +481,7 @@ function testPrivateKey(
                 },
 
                 scopes: [
-
-                    GOOGLE_ANALYTICS_SCOPE
-
+                    "https://www.googleapis.com/auth/analytics.readonly"
                 ]
 
             });
@@ -483,12 +492,8 @@ function testPrivateKey(
         );
 
 
-        console.log(
-            "✅ GoogleAuth konfiguracija: OK"
-        );
-
-
         return auth;
+
 
     } catch (error) {
 
@@ -560,11 +565,6 @@ async function testGoogleAuthentication(
             !tokenResponse.token
         ) {
 
-            console.error(
-                "❌ Google nije vratio access token."
-            );
-
-
             throw new Error(
                 "Google OAuth2 access token nije dobijen."
             );
@@ -582,12 +582,8 @@ async function testGoogleAuthentication(
         );
 
 
-        console.log(
-            "Google autentikacija: OK"
-        );
-
-
         return client;
+
 
     } catch (error) {
 
@@ -667,7 +663,7 @@ function getSerbiaDateTime() {
 
 
 /* =========================================================
-   PRETVORI GA PAGE PATH U ID SERIJE
+   PRETVORI PAGE PATH U ID SERIJE
 ========================================================= */
 
 function convertPageToId(
@@ -700,14 +696,6 @@ function convertPageToId(
 
     /* =====================================================
        QUERY STRING
-    =====================================================
-
-       Primer:
-
-       series/?id=moja-serija
-
-       -> moja-serija
-
     ===================================================== */
 
     const questionIndex =
@@ -755,7 +743,7 @@ function convertPageToId(
 
 
     /* =====================================================
-       NIJE SERIJA
+       NEVALIDNE STRANICE
     ===================================================== */
 
     if (
@@ -771,7 +759,7 @@ function convertPageToId(
 
 
     /* =====================================================
-       UKLONI INDEX.HTML
+       INDEX.HTML
     ===================================================== */
 
     value =
@@ -782,7 +770,7 @@ function convertPageToId(
 
 
     /* =====================================================
-       UKLONI .HTML
+       .HTML
     ===================================================== */
 
     value =
@@ -854,6 +842,7 @@ function createAnalyticsClient(
 
         return client;
 
+
     } catch (error) {
 
         console.error(
@@ -877,7 +866,7 @@ function createAnalyticsClient(
 
 
 /* =========================================================
-   TEST GA4 PROPERTY PRISTUPA
+   TEST GA4 PROPERTY
 ========================================================= */
 
 async function testGA4Property(
@@ -973,6 +962,7 @@ async function testGA4Property(
 
         return true;
 
+
     } catch (error) {
 
         console.error("");
@@ -1020,12 +1010,7 @@ async function testGA4Property(
 
 
             console.error(
-                "Proveri GOOGLE_SERVICE_ACCOUNT_JSON."
-            );
-
-
-            console.error(
-                "Posebno private_key i client_email."
+                "Proveri private_key i client_email."
             );
 
         }
@@ -1039,7 +1024,7 @@ async function testGA4Property(
 
             console.error("");
             console.error(
-                "❌ PROBLEM JE DOZVOLA ILI GOOGLE API."
+                "❌ PROBLEM JE DOZVOLA."
             );
 
 
@@ -1049,23 +1034,23 @@ async function testGA4Property(
 
 
             console.error(
-                "ali Google nije dozvolio zahtev."
-            );
-
-
-            console.error(
-                "Proveri da li je Google Analytics Data API ukljucen."
-            );
-
-
-            console.error(
-                "Takodje proveri pristup Service Account-a Property-ju."
+                "ali nema pristup GA4 Property-ju."
             );
 
 
             console.error(
                 "Property:",
                 PROPERTY_ID
+            );
+
+
+            console.error(
+                "Dodaj Service Account email u:"
+            );
+
+
+            console.error(
+                "Google Analytics → Admin → Property Access Management."
             );
 
         }
@@ -1099,12 +1084,12 @@ async function testGA4Property(
 
 
 /* =========================================================
-   UCITAVANJE JEDNOG GA4 PERIODA
+   UCITAVANJE JEDNOG PERIODA
 ========================================================= */
 
-async function getAnalyticsPeriod(
+async function getPeriodData(
     analyticsDataClient,
-    label,
+    nazivPerioda,
     startDate,
     endDate
 ) {
@@ -1117,18 +1102,14 @@ async function getAnalyticsPeriod(
 
     console.log(
         "UCITAVAM:",
-        label
+        nazivPerioda
     );
 
 
     console.log(
-        "startDate:",
-        startDate
-    );
-
-
-    console.log(
-        "endDate:",
+        "Period:",
+        startDate,
+        "→",
         endDate
     );
 
@@ -1203,7 +1184,7 @@ async function getAnalyticsPeriod(
                 ],
 
                 limit:
-                    100
+                    10000
 
             });
 
@@ -1214,13 +1195,7 @@ async function getAnalyticsPeriod(
 
 
         console.log(
-            "✅ GA4 podaci ucitani:"
-        );
-
-
-        console.log(
-            "Period:",
-            label
+            "✅ GA4 podaci ucitani."
         );
 
 
@@ -1270,10 +1245,9 @@ async function getAnalyticsPeriod(
 
     } catch (error) {
 
-        console.error("");
         console.error(
-            "❌ GRESKA PRI UCITAVANJU:",
-            label
+            "❌ Greska pri citanju perioda:",
+            nazivPerioda
         );
 
 
@@ -1325,28 +1299,12 @@ function filterSeriesPages(
             const id =
                 String(
                     item.id
-                ).trim().toLowerCase();
+                ).toLowerCase();
 
 
             if (
-                id === "index"
-            ) {
-
-                return false;
-
-            }
-
-
-            if (
-                id === "index.html"
-            ) {
-
-                return false;
-
-            }
-
-
-            if (
+                id === "index" ||
+                id === "index.html" ||
                 id === "series"
             ) {
 
@@ -1355,8 +1313,21 @@ function filterSeriesPages(
             }
 
 
+            /*
+             * Ako GA4 uhvati
+             * CSS/JS/slike ili slicno,
+             * ignorisemo ih.
+             */
+
             if (
-                id === "home"
+                id.includes(".css") ||
+                id.includes(".js") ||
+                id.includes(".png") ||
+                id.includes(".jpg") ||
+                id.includes(".jpeg") ||
+                id.includes(".webp") ||
+                id.includes(".gif") ||
+                id.includes(".svg")
             ) {
 
                 return false;
@@ -1458,7 +1429,11 @@ function getTop(
     data
 ) {
 
-    return data
+    return removeDuplicates(
+        filterSeriesPages(
+            data
+        )
+    )
         .sort(
             function(a, b) {
 
@@ -1484,34 +1459,7 @@ function getTop(
 
 
 /* =========================================================
-   OBRADA GA4 PODATAKA
-========================================================= */
-
-function processAnalytics(
-    rows
-) {
-
-    const filtered =
-        filterSeriesPages(
-            rows
-        );
-
-
-    const unique =
-        removeDuplicates(
-            filtered
-        );
-
-
-    return getTop(
-        unique
-    );
-
-}
-
-
-/* =========================================================
-   ISPIS TOP LISTE
+   PRIKAZ TOP LISTE
 ========================================================= */
 
 function printTop(
@@ -1526,8 +1474,7 @@ function printTop(
 
 
     if (
-        !data ||
-        data.length === 0
+        !data.length
     ) {
 
         console.log(
@@ -1554,10 +1501,10 @@ function printTop(
 
 
 /* =========================================================
-   PRETVORI ZA JSON
+   FORMATIRANJE LISTE ZA JSON
 ========================================================= */
 
-function prepareItems(
+function formatList(
     data
 ) {
 
@@ -1588,9 +1535,9 @@ function prepareItems(
 ========================================================= */
 
 function createPopularJSON(
-    allTime,
-    last30Days,
-    today
+    popularOduvek,
+    popular30Dana,
+    popularDanas
 ) {
 
     section(
@@ -1603,66 +1550,77 @@ function createPopularJSON(
         updatedAt:
             new Date().toISOString(),
 
-
         updatedAtSerbia:
             getSerbiaDateTime(),
 
-
         timezone:
             TIME_ZONE,
-
 
         propertyId:
             PROPERTY_ID,
 
 
-        topLimit:
-            TOP_LIMIT,
-
+        /* ==============================================
+           POPULARNO ODUVEK
+        ============================================== */
 
         popularnoOduvek: {
 
-            period:
-                "oduvek",
+            title:
+                "Popularno oduvek",
 
             count:
-                allTime.length,
+                popularOduvek.length,
 
             items:
-                prepareItems(
-                    allTime
+                formatList(
+                    popularOduvek
                 )
 
         },
 
 
-        najgledanije30Dana: {
+        /* ==============================================
+           POPULARNO 30 DANA
+        ============================================== */
+
+        popularno30Dana: {
+
+            title:
+                "Najgledanije 30 dana",
 
             period:
                 "30 dana",
 
             count:
-                last30Days.length,
+                popular30Dana.length,
 
             items:
-                prepareItems(
-                    last30Days
+                formatList(
+                    popular30Dana
                 )
 
         },
 
 
-        najposecenijeDanas: {
+        /* ==============================================
+           POPULARNO DANAS
+        ============================================== */
+
+        popularnoDanas: {
+
+            title:
+                "Najgledanije danas",
 
             period:
                 "danas",
 
             count:
-                today.length,
+                popularDanas.length,
 
             items:
-                prepareItems(
-                    today
+                formatList(
+                    popularDanas
                 )
 
         }
@@ -1696,39 +1654,50 @@ function createPopularJSON(
     );
 
 
+    console.log("");
     console.log(
-        "Oduvek:",
-        allTime.length
+        "=========================================="
     );
 
 
     console.log(
-        "30 dana:",
-        last30Days.length
+        "POPULARNO ODUVEK:",
+        popularOduvek.length
     );
 
 
     console.log(
-        "Danas:",
-        today.length
+        "POPULARNO 30 DANA:",
+        popular30Dana.length
+    );
+
+
+    console.log(
+        "POPULARNO DANAS:",
+        popularDanas.length
+    );
+
+
+    console.log(
+        "=========================================="
     );
 
 
     printTop(
         "TOP 10 - POPULARNO ODUVEK",
-        allTime
+        popularOduvek
     );
 
 
     printTop(
         "TOP 10 - NAJGLEDANIJE 30 DANA",
-        last30Days
+        popular30Dana
     );
 
 
     printTop(
-        "TOP 10 - NAJPOSECENIJE DANAS",
-        today
+        "TOP 10 - NAJGLEDANIJE DANAS",
+        popularDanas
     );
 
 
@@ -1761,34 +1730,14 @@ async function createPopularJSONProcess() {
 
 
     console.log(
-        "TOP limit:",
+        "Top limit:",
         TOP_LIMIT
-    );
-
-
-    console.log(
-        "Kreiramo 3 popularne liste:"
-    );
-
-
-    console.log(
-        "1. Popularno oduvek"
-    );
-
-
-    console.log(
-        "2. Najgledanije 30 dana"
-    );
-
-
-    console.log(
-        "3. Najposecenije danas"
     );
 
 
     try {
 
-        /* =================================================
+        /* ================================================
            1. CREDENTIALS
         ================================================= */
 
@@ -1796,7 +1745,7 @@ async function createPopularJSONProcess() {
             getCredentials();
 
 
-        /* =================================================
+        /* ================================================
            2. GOOGLE AUTH
         ================================================= */
 
@@ -1806,7 +1755,7 @@ async function createPopularJSONProcess() {
             );
 
 
-        /* =================================================
+        /* ================================================
            3. OAUTH TOKEN
         ================================================= */
 
@@ -1815,7 +1764,7 @@ async function createPopularJSONProcess() {
         );
 
 
-        /* =================================================
+        /* ================================================
            4. GA4 CLIENT
         ================================================= */
 
@@ -1825,7 +1774,7 @@ async function createPopularJSONProcess() {
             );
 
 
-        /* =================================================
+        /* ================================================
            5. PROPERTY ACCESS
         ================================================= */
 
@@ -1834,135 +1783,121 @@ async function createPopularJSONProcess() {
         );
 
 
-        /* =================================================
-           6. POPULARNO ODUVEK
+        /* ================================================
+           6A. ODUVEK
         ================================================= */
 
         section(
-            "6A. POPULARNO ODUVEK"
+            "6A. UCITAVANJE - POPULARNO ODUVEK"
         );
 
 
-        /*
-         * GA4 nema beskonacnu istoriju.
-         *
-         * Koristimo dovoljno star pocetak.
-         * Stvarna dostupnost zavisi od GA4
-         * data retention podesavanja.
-         */
-
-        const allTimeRows =
-            await getAnalyticsPeriod(
-
+        const oduvek =
+            await getPeriodData(
                 analyticsDataClient,
-
                 "Popularno oduvek",
-
                 "2020-01-01",
-
                 "today"
-
             );
 
 
-        const allTime =
-            processAnalytics(
-                allTimeRows
-            );
-
-
-        printTop(
-            "TOP 10 - POPULARNO ODUVEK",
-            allTime
-        );
-
-
-        /* =================================================
-           7. POSLEDNJIH 30 DANA
+        /* ================================================
+           6B. 30 DANA
         ================================================= */
 
         section(
-            "6B. NAJGLEDANIJE 30 DANA"
+            "6B. UCITAVANJE - POSLEDNJIH 30 DANA"
         );
 
 
-        const last30Rows =
-            await getAnalyticsPeriod(
-
+        const poslednjih30 =
+            await getPeriodData(
                 analyticsDataClient,
-
                 "Najgledanije 30 dana",
-
                 "30daysAgo",
-
                 "yesterday"
-
             );
 
 
-        const last30Days =
-            processAnalytics(
-                last30Rows
-            );
-
-
-        printTop(
-            "TOP 10 - NAJGLEDANIJE 30 DANA",
-            last30Days
-        );
-
-
-        /* =================================================
-           8. DANAS
+        /* ================================================
+           6C. DANAS
         ================================================= */
 
         section(
-            "6C. NAJPOSECENIJE DANAS"
+            "6C. UCITAVANJE - DANAS"
         );
 
 
-        const todayRows =
-            await getAnalyticsPeriod(
-
+        const danas =
+            await getPeriodData(
                 analyticsDataClient,
-
-                "Najposecenije danas",
-
+                "Najgledanije danas",
                 "today",
-
                 "today"
-
             );
 
 
-        const today =
-            processAnalytics(
-                todayRows
-            );
+        /* ================================================
+           7. TOP LISTE
+        ================================================= */
 
-
-        printTop(
-            "TOP 10 - NAJPOSECENIJE DANAS",
-            today
+        section(
+            "7. OBRADA TOP LISTA"
         );
 
 
-        /* =================================================
-           9. JSON
+        const popularnoOduvek =
+            getTop(
+                oduvek
+            );
+
+
+        const popularno30Dana =
+            getTop(
+                poslednjih30
+            );
+
+
+        const popularnoDanas =
+            getTop(
+                danas
+            );
+
+
+        console.log(
+            "Popularno oduvek:",
+            popularnoOduvek.length
+        );
+
+
+        console.log(
+            "Popularno 30 dana:",
+            popularno30Dana.length
+        );
+
+
+        console.log(
+            "Popularno danas:",
+            popularnoDanas.length
+        );
+
+
+        /* ================================================
+           8. JSON
         ================================================= */
 
         createPopularJSON(
 
-            allTime,
+            popularnoOduvek,
 
-            last30Days,
+            popularno30Dana,
 
-            today
+            popularnoDanas
 
         );
 
 
-        /* =================================================
+        /* ================================================
            USPESNO
         ================================================= */
 
@@ -2002,12 +1937,12 @@ async function createPopularJSONProcess() {
 
 
         console.log(
-            "✅ Najgledanije 30 dana: OK"
+            "✅ Popularno 30 dana: OK"
         );
 
 
         console.log(
-            "✅ Najposecenije danas: OK"
+            "✅ Popularno danas: OK"
         );
 
 
@@ -2108,10 +2043,8 @@ async function createPopularJSONProcess() {
                 "Posebno private_key i client_email."
             );
 
-        }
 
-
-        else if (
+        } else if (
             Number(
                 error.code
             ) === 7
@@ -2123,27 +2056,12 @@ async function createPopularJSONProcess() {
 
 
             console.error(
-                "Service Account se autentifikovao,"
+                "Service Account je autentifikovan,"
             );
 
 
             console.error(
-                "ali Google nije dozvolio zahtev."
-            );
-
-
-            console.error(
-                "Proveri Google Analytics Data API."
-            );
-
-
-            console.error(
-                "Proveri da li je API ukljucen u Google Cloud projektu."
-            );
-
-
-            console.error(
-                "Proveri i GA4 Property Access Management."
+                "ali nema pristup GA4 Property-ju."
             );
 
 
@@ -2152,10 +2070,18 @@ async function createPopularJSONProcess() {
                 PROPERTY_ID
             );
 
-        }
+
+            console.error(
+                "Dodaj Service Account email u:"
+            );
 
 
-        else if (
+            console.error(
+                "Google Analytics → Admin → Property Access Management"
+            );
+
+
+        } else if (
             Number(
                 error.code
             ) === 5
@@ -2176,10 +2102,8 @@ async function createPopularJSONProcess() {
                 PROPERTY_ID
             );
 
-        }
 
-
-        else {
+        } else {
 
             console.error(
                 "❌ Nepoznata Google/API greska."
