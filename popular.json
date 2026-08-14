@@ -1,0 +1,22 @@
+{
+    "updatedAt": "2026-08-14T09:05:30.920Z",
+    "updatedAtSerbia": "14.08.2026. 11:05:30",
+    "timezone": "Europe/Belgrade",
+    "propertyId": "549759235",
+    "period": "30 dana",
+    "count": 3,
+    "items": [
+        {
+            "id": "index.html",
+            "visits": 69
+        },
+        {
+            "id": "index.html.html",
+            "visits": 1
+        },
+        {
+            "id": "moja-serija-001.html",
+            "visits": 1
+        }
+    ]
+}
