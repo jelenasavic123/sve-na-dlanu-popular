@@ -5,48 +5,16 @@
     "propertyId": "549759235",
 
     "allTime": {
-        "period": "sve vreme",
+        "period": "Sve vreme",
         "count": 10,
         "items": [
             {
                 "id": "samo-17-daha-on-yedi",
-                "visits": 1250
-            },
-            {
-                "id": "rat-ruza-gullerin-savasi",
-                "visits": 1120
+                "visits": 173
             },
             {
                 "id": "zakoni-prirode-doganin-kanunu",
-                "visits": 980
-            },
-            {
-                "id": "porodica-sakir-pasa-sakir-pasa-ailesi",
-                "visits": 870
-            },
-            {
-                "id": "voljena-proslost-sevgili-gecmis",
-                "visits": 760
-            },
-            {
-                "id": "pisma-iz-proslosti-gelecege-mektuplar",
-                "visits": 690
-            },
-            {
-                "id": "sudbina-moje-cerke-goc-zamani",
-                "visits": 610
-            },
-            {
-                "id": "novi-zivot-yeni-hayat",
-                "visits": 580
-            },
-            {
-                "id": "obecavam-ti-sana-soz",
-                "visits": 520
-            },
-            {
-                "id": "vreme-je-za-ljubav-seven-ne-yapmaz",
-                "visits": 490
+                "visits": 152
             }
         ]
     },
@@ -56,91 +24,63 @@
         "count": 10,
         "items": [
             {
-                "id": "samo-17-daha-on-yedi",
-                "visits": 73
+                "id": "novi-zivot-yeni-hayat",
+                "visits": 25
             },
             {
-                "id": "zakoni-prirode-doganin-kanunu",
-                "visits": 64
-            },
-            {
-                "id": "rat-ruza-gullerin-savasi",
-                "visits": 56
-            },
-            {
-                "id": "porodica-sakir-pasa-sakir-pasa-ailesi",
-                "visits": 42
-            },
-            {
-                "id": "voljena-proslost-sevgili-gecmis",
-                "visits": 37
+                "id": "obecavam-ti-sana-soz",
+                "visits": 18
             },
             {
                 "id": "pisma-iz-proslosti-gelecege-mektuplar",
                 "visits": 31
             },
             {
+                "id": "porodica-sakir-pasa-sakir-pasa-ailesi",
+                "visits": 42
+            },
+            {
+                "id": "rat-ruza-gullerin-savasi",
+                "visits": 56
+            },
+            {
+                "id": "samo-17-daha-on-yedi",
+                "visits": 73
+            },
+            {
                 "id": "sudbina-moje-cerke-goc-zamani",
                 "visits": 29
             },
             {
-                "id": "novi-zivot-yeni-hayat",
-                "visits": 25
+                "id": "voljena-proslost-sevgili-gecmis",
+                "visits": 37
             },
             {
                 "id": "vreme-je-za-ljubav-seven-ne-yapmaz",
                 "visits": 21
             },
             {
-                "id": "obecavam-ti-sana-soz",
-                "visits": 18
+                "id": "zakoni-prirode-doganin-kanunu",
+                "visits": 64
             }
         ]
     },
 
     "today": {
-        "period": "danas",
+        "period": "Danas",
         "count": 10,
         "items": [
             {
                 "id": "samo-17-daha-on-yedi",
-                "visits": 18
+                "visits": 14
             },
             {
                 "id": "rat-ruza-gullerin-savasi",
-                "visits": 15
-            },
-            {
-                "id": "zakoni-prirode-doganin-kanunu",
                 "visits": 12
             },
             {
-                "id": "porodica-sakir-pasa-sakir-pasa-ailesi",
-                "visits": 10
-            },
-            {
-                "id": "voljena-proslost-sevgili-gecmis",
-                "visits": 8
-            },
-            {
-                "id": "pisma-iz-proslosti-gelecege-mektuplar",
-                "visits": 7
-            },
-            {
-                "id": "novi-zivot-yeni-hayat",
-                "visits": 6
-            },
-            {
-                "id": "sudbina-moje-cerke-goc-zamani",
-                "visits": 5
-            },
-            {
-                "id": "obecavam-ti-sana-soz",
-                "visits": 4
-            },
-            {
-                "id": "vreme-je-za-ljubav-seven-ne-yapmaz",
-                "visits": 3
+                "id": "zakoni-prirode-doganin-kanunu",
+                "visits": 9
             }
         ]
     }
