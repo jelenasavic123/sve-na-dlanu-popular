@@ -1,0 +1,85 @@
+name: Sve na dlanu - Popularno
+
+on:
+  workflow_dispatch:
+
+  schedule:
+    # 09:30 UTC = 11:30 Srbija tokom letnjeg vremena
+    - cron: "30 9 * * *"
+
+permissions:
+  contents: write
+
+
+jobs:
+
+  popular:
+
+    runs-on: ubuntu-latest
+
+
+    steps:
+
+      # ==========================================
+      # PREUZMI REPOSITORY
+      # ==========================================
+
+      - name: Preuzmi repository
+
+        uses: actions/checkout@v4
+
+
+      # ==========================================
+      # NODE.JS
+      # ==========================================
+
+      - name: Podesi Node.js
+
+        uses: actions/setup-node@v4
+
+        with:
+
+          node-version: 20
+
+          cache: npm
+
+
+      # ==========================================
+      # INSTALACIJA
+      # ==========================================
+
+      - name: Instaliraj pakete
+
+        run: npm ci
+
+
+      # ==========================================
+      # GOOGLE ANALYTICS
+      # ==========================================
+
+      - name: Pokreni popular.js
+
+        env:
+
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+
+        run: node popular.js
+
+
+      # ==========================================
+      # SACUVAJ popular.json
+      # ==========================================
+
+      - name: Sacuvaj novi popular.json
+
+        run: |
+
+          git config user.name "github-actions[bot]"
+
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add popular.json
+
+          git diff --cached --quiet || git commit -m "Update popular.json"
+
+          git push
