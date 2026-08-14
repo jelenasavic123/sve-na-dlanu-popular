@@ -10,13 +10,11 @@ on:
 permissions:
   contents: write
 
-
 jobs:
 
   popular:
 
     runs-on: ubuntu-latest
-
 
     steps:
 
@@ -38,10 +36,23 @@ jobs:
         uses: actions/setup-node@v4
 
         with:
-
-          node-version: 20
-
+          node-version: 24
           cache: npm
+
+
+      # ==========================================
+      # PROVERA NODE
+      # ==========================================
+
+      - name: Proveri Node.js
+
+        run: |
+
+          echo "Node verzija:"
+          node --version
+
+          echo "NPM verzija:"
+          npm --version
 
 
       # ==========================================
@@ -54,16 +65,84 @@ jobs:
 
 
       # ==========================================
+      # PROVERA GOOGLE SECRET
+      # ==========================================
+
+      - name: Proveri Google Secret
+
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+
+        run: |
+
+          if [ -z "$GOOGLE_SERVICE_ACCOUNT_JSON" ]; then
+            echo "GRESKA: GOOGLE_SERVICE_ACCOUNT_JSON SECRET NIJE POSTAVLJEN!"
+            exit 1
+          fi
+
+          echo "Google Secret postoji."
+
+          echo "$GOOGLE_SERVICE_ACCOUNT_JSON" > /tmp/google-service-account.json
+
+          node -e "
+          const fs = require('fs');
+
+          const data = JSON.parse(
+            fs.readFileSync('/tmp/google-service-account.json', 'utf8')
+          );
+
+          console.log('client_email postoji:', !!data.client_email);
+          console.log('private_key postoji:', !!data.private_key);
+
+          if (!data.client_email || !data.private_key) {
+            console.error('GRESKA: Secret nema client_email ili private_key.');
+            process.exit(1);
+          }
+
+          console.log('Google Service Account JSON je validan.');
+          "
+
+
+      # ==========================================
       # GOOGLE ANALYTICS
       # ==========================================
 
       - name: Pokreni popular.js
 
         env:
-
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
 
-        run: node popular.js
+        run: |
+
+          echo "=========================================="
+          echo "POKRECEM popular.js"
+          echo "=========================================="
+
+          node popular.js
+
+
+      # ==========================================
+      # PROVERI popular.json
+      # ==========================================
+
+      - name: Proveri popular.json
+
+        run: |
+
+          echo "=========================================="
+          echo "PROVERA popular.json"
+          echo "=========================================="
+
+          if [ ! -f popular.json ]; then
+            echo "GRESKA: popular.json nije napravljen!"
+            exit 1
+          fi
+
+          echo "popular.json postoji."
+
+          echo ""
+          echo "Sadrzaj:"
+          cat popular.json
 
 
       # ==========================================
@@ -80,6 +159,14 @@ jobs:
 
           git add popular.json
 
-          git diff --cached --quiet || git commit -m "Update popular.json"
+          if git diff --cached --quiet; then
 
-          git push
+            echo "Nema promena u popular.json."
+
+          else
+
+            git commit -m "Update popular.json"
+
+            git push
+
+          fi
