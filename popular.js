@@ -4,7 +4,7 @@
 
    - Google Analytics 4 Data API
    - Uzima najposecenije stranice
-   - Pretvara URL stranice u ID
+   - Pretvara URL stranice u ID serije
    - Cuva TOP 20 u popular.json
    - GitHub Actions ga pokrece svaki dan
 ========================================================= */
@@ -12,24 +12,26 @@
 const fs = require("fs");
 const path = require("path");
 
-const { BetaAnalyticsDataClient } =
-    require("@google-analytics/data");
+const {
+    BetaAnalyticsDataClient
+} = require("@google-analytics/data");
 
 
 /* =========================================================
    PODESAVANJA
 ========================================================= */
 
-const PROPERTY_ID = "549759235";
+const PROPERTY_ID =
+    "549759235";
 
-const TOP_LIMIT = 20;
+const TOP_LIMIT =
+    20;
 
 const OUTPUT_FILE =
     path.join(
         __dirname,
         "popular.json"
     );
-
 
 const TIME_ZONE =
     "Europe/Belgrade";
@@ -129,7 +131,7 @@ function getSerbiaDateTime() {
 
 
 /* =========================================================
-   ID IZ PAGE PATH
+   PRETVORI GA PAGE PATH U ID SERIJE
 ========================================================= */
 
 function convertPageToId(
@@ -150,14 +152,17 @@ function convertPageToId(
 
 
     /*
-     * Ako je:
+     * ============================================
+     * PRIMER:
      *
      * /moja-serija-001.html
      *
-     * dobijamo:
+     * POSTAJE:
      *
-     * moja-serija-001.html
+     * moja-serija-001
+     * ============================================
      */
+
 
     value =
         value.replace(
@@ -167,14 +172,146 @@ function convertPageToId(
 
 
     /*
-     * Ako GA vrati samo:
+     * Ako postoji query string,
+     * ukloni ga.
      *
-     * index.html
+     * npr:
      *
-     * ostavljamo index.html
+     * series/?id=moja-serija-001
+     *
      */
 
-    return value;
+
+    const questionIndex =
+        value.indexOf("?");
+
+
+    if (
+        questionIndex !== -1
+    ) {
+
+        const query =
+            value.substring(
+                questionIndex + 1
+            );
+
+
+        const params =
+            new URLSearchParams(
+                query
+            );
+
+
+        /*
+         * Ako postoji:
+         *
+         * ?id=moja-serija-001
+         *
+         * uzmi upravo taj ID.
+         */
+
+
+        const id =
+            params.get("id");
+
+
+        if (id) {
+
+            return String(
+                id
+            ).trim();
+
+        }
+
+
+        /*
+         * Ako nema id parametra,
+         * ukloni query.
+         */
+
+
+        value =
+            value.substring(
+                0,
+                questionIndex
+            );
+
+    }
+
+
+    /*
+     * Ako je:
+     *
+     * series/
+     *
+     * to nije serija.
+     */
+
+
+    if (
+        value === "series" ||
+        value === "series/" ||
+        value === "index.html" ||
+        value === ""
+    ) {
+
+        return "";
+
+    }
+
+
+    /*
+     * Ukloni index.html
+     */
+
+
+    value =
+        value.replace(
+            /\/index\.html$/i,
+            ""
+        );
+
+
+    /*
+     * Ukloni .html
+     *
+     * moja-serija-001.html
+     *
+     * ->
+     *
+     * moja-serija-001
+     */
+
+
+    value =
+        value.replace(
+            /\.html$/i,
+            ""
+        );
+
+
+    /*
+     * Ako je ostala putanja,
+     * uzmi poslednji deo.
+     *
+     * npr:
+     *
+     * series/moja-serija-001
+     *
+     * ->
+     *
+     * moja-serija-001
+     */
+
+
+    value =
+        value
+            .split("/")
+            .filter(Boolean)
+            .pop() || "";
+
+
+    return value.trim();
 
 }
 
@@ -188,6 +325,7 @@ async function getAnalyticsData() {
     console.log(
         "Povezujem se sa Google Analytics..."
     );
+
 
     console.log(
         "Property:",
@@ -221,12 +359,18 @@ async function getAnalyticsData() {
 
 
     /*
+     * GA4:
+     *
      * pagePath
-     * = URL putanja stranice
+     * = putanja stranice
      *
      * screenPageViews
-     * = broj pregleda stranice
+     * = broj pregleda
+     *
+     * period:
+     * poslednjih 30 dana
      */
+
 
     const [
         response
@@ -240,7 +384,7 @@ async function getAnalyticsData() {
 
                 {
                     startDate:
-                        "yesterday",
+                        "30daysAgo",
 
                     endDate:
                         "yesterday"
@@ -314,12 +458,29 @@ async function getAnalyticsData() {
                 );
 
 
+            const id =
+                convertPageToId(
+                    pagePath
+                );
+
+
+            console.log(
+                "GA:",
+                pagePath,
+                "->",
+                id,
+                "->",
+                views
+            );
+
+
             return {
 
+                originalPath:
+                    pagePath,
+
                 id:
-                    convertPageToId(
-                        pagePath
-                    ),
+                    id,
 
                 visits:
                     views
@@ -351,8 +512,19 @@ function filterSeriesPages(
 
 
             /*
-             * Ignorisemo glavnu stranicu.
+             * Glavna stranica
              */
+
+
+            if (
+                item.id ===
+                "index"
+            ) {
+
+                return false;
+
+            }
+
 
             if (
                 item.id ===
@@ -364,16 +536,9 @@ function filterSeriesPages(
             }
 
 
-            /*
-             * Uzimamo samo HTML stranice.
-             */
-
             if (
-                !item.id
-                    .toLowerCase()
-                    .endsWith(
-                        ".html"
-                    )
+                item.id ===
+                "series"
             ) {
 
                 return false;
@@ -381,9 +546,91 @@ function filterSeriesPages(
             }
 
 
+            /*
+             * Ako je Google Analytics
+             * poslao neki sistemski URL
+             * bez ID-ja, preskoci.
+             */
+
+
             return true;
 
         }
+    );
+
+}
+
+
+/* =========================================================
+   UKLONI DUPLIKATE
+========================================================= */
+
+function removeDuplicates(
+    data
+) {
+
+    const map =
+        new Map();
+
+
+    data.forEach(
+        function(item) {
+
+            const id =
+                String(
+                    item.id || ""
+                ).trim();
+
+
+            if (!id) {
+
+                return;
+
+            }
+
+
+            const old =
+                map.get(
+                    id
+                );
+
+
+            /*
+             * Ako se isti ID pojavi
+             * vise puta, saberi preglede.
+             */
+
+
+            if (old) {
+
+                old.visits +=
+                    Number(
+                        item.visits || 0
+                    );
+
+            } else {
+
+                map.set(
+                    id,
+                    {
+                        id:
+                            id,
+
+                        visits:
+                            Number(
+                                item.visits || 0
+                            )
+                    }
+                );
+
+            }
+
+        }
+    );
+
+
+    return Array.from(
+        map.values()
     );
 
 }
@@ -396,6 +643,7 @@ function filterSeriesPages(
 async function createPopularJSON() {
 
     console.log("");
+
     console.log(
         "=========================================="
     );
@@ -408,15 +656,24 @@ async function createPopularJSON() {
         "=========================================="
     );
 
+
     console.log(
         "Vreme Srbije:",
         getSerbiaDateTime()
     );
 
+
     console.log(
         "Property:",
         PROPERTY_ID
     );
+
+
+    console.log(
+        "Period:",
+        "30 dana"
+    );
+
 
     console.log(
         "=========================================="
@@ -426,16 +683,22 @@ async function createPopularJSON() {
     try {
 
         /*
-         * Uzmi GA4
+         * ========================================
+         * 1. UZMI GA4
+         * ========================================
          */
+
 
         const analytics =
             await getAnalyticsData();
 
 
         /*
-         * Filtriraj samo stranice serija
+         * ========================================
+         * 2. FILTRIRAJ
+         * ========================================
          */
+
 
         const seriesPages =
             filterSeriesPages(
@@ -444,11 +707,27 @@ async function createPopularJSON() {
 
 
         /*
-         * Sortiraj
+         * ========================================
+         * 3. UKLONI DUPLIKATE
+         * ========================================
          */
 
+
+        const uniqueSeries =
+            removeDuplicates(
+                seriesPages
+            );
+
+
+        /*
+         * ========================================
+         * 4. SORTIRAJ
+         * ========================================
+         */
+
+
         const popular =
-            seriesPages
+            uniqueSeries
                 .sort(
                     function(a, b) {
 
@@ -469,7 +748,15 @@ async function createPopularJSON() {
                 );
 
 
+        /*
+         * ========================================
+         * 5. ISPIS
+         * ========================================
+         */
+
+
         console.log("");
+
         console.log(
             "TOP 20:"
         );
@@ -487,8 +774,11 @@ async function createPopularJSON() {
 
 
         /*
-         * JSON
+         * ========================================
+         * 6. JSON
+         * ========================================
          */
+
 
         const output = {
 
@@ -505,7 +795,7 @@ async function createPopularJSON() {
                 PROPERTY_ID,
 
             period:
-                "yesterday",
+                "30 dana",
 
             count:
                 popular.length,
@@ -533,8 +823,11 @@ async function createPopularJSON() {
 
 
         /*
-         * Sacuvaj
+         * ========================================
+         * 7. SACUVAJ
+         * ========================================
          */
+
 
         fs.writeFileSync(
 
@@ -551,7 +844,15 @@ async function createPopularJSON() {
         );
 
 
+        /*
+         * ========================================
+         * 8. GOTOVO
+         * ========================================
+         */
+
+
         console.log("");
+
         console.log(
             "=========================================="
         );
@@ -564,23 +865,28 @@ async function createPopularJSON() {
             "=========================================="
         );
 
+
         console.log(
             "Napravljen:"
         );
 
+
         console.log(
             OUTPUT_FILE
         );
+
 
         console.log(
             "Broj:",
             popular.length
         );
 
+
         console.log(
             "Vreme Srbije:",
             getSerbiaDateTime()
         );
+
 
         console.log(
             "=========================================="
@@ -588,10 +894,10 @@ async function createPopularJSON() {
 
         console.log("");
 
-
     } catch (error) {
 
         console.error("");
+
         console.error(
             "=========================================="
         );
@@ -604,9 +910,11 @@ async function createPopularJSON() {
             "=========================================="
         );
 
+
         console.error(
-            error.message
+            error
         );
+
 
         console.error("");
 
