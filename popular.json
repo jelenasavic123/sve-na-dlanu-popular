@@ -1,50 +1,39 @@
 {
-    "updatedAt": "2026-08-14T11:20:00.000Z",
-    "updatedAtSerbia": "14.08.2026. 13:20:00",
+    "updatedAt": "2026-08-14T11:30:00.000Z",
+    "updatedAtSerbia": "14.08.2026. 13:30:00",
     "timezone": "Europe/Belgrade",
     "propertyId": "549759235",
-    "period": "30 dana",
-    "count": 10,
-    "items": [
-        {
-            "id": "novi-zivot-yeni-hayat",
-            "visits": 25
-        },
-        {
-            "id": "obecavam-ti-sana-soz",
-            "visits": 18
-        },
-        {
-            "id": "pisma-iz-proslosti-gelecege-mektuplar",
-            "visits": 31
-        },
-        {
-            "id": "porodica-sakir-pasa-sakir-pasa-ailesi",
-            "visits": 42
-        },
-        {
-            "id": "rat-ruza-gullerin-savasi",
-            "visits": 56
-        },
+
+    "popularAllTime": [
         {
             "id": "samo-17-daha-on-yedi",
-            "visits": 73
-        },
-        {
-            "id": "sudbina-moje-cerke-goc-zamani",
-            "visits": 29
-        },
-        {
-            "id": "voljena-proslost-sevgili-gecmis",
-            "visits": 37
-        },
-        {
-            "id": "vreme-je-za-ljubav-seven-ne-yapmaz",
-            "visits": 21
+            "visits": 12540
         },
         {
             "id": "zakoni-prirode-doganin-kanunu",
+            "visits": 9840
+        }
+    ],
+
+    "popular30Days": [
+        {
+            "id": "samo-17-daha-on-yedi",
+            "visits": 740
+        },
+        {
+            "id": "rat-ruza-gullerin-savasi",
+            "visits": 560
+        }
+    ],
+
+    "popularToday": [
+        {
+            "id": "zakoni-prirode-doganin-kanunu",
             "visits": 64
+        },
+        {
+            "id": "samo-17-daha-on-yedi",
+            "visits": 52
         }
     ]
 }
