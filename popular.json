@@ -1,4 +1,3 @@
-
 {
     "updatedAt": "2026-08-14T09:05:30.920Z",
     "updatedAtSerbia": "14.08.2026. 11:05:30",
@@ -8,16 +7,16 @@
     "count": 3,
     "items": [
         {
-            "id": "index.html",
+            "id": "moja-serija-001",
             "visits": 69
         },
         {
-            "id": "moja-serija-001",
-            "visits": 1
+            "id": "moja-serija-002",
+            "visits": 25
         },
         {
-            "id": "moja-serija-002",
-            "visits": 1
+            "id": "moja-serija-003",
+            "visits": 12
         }
     ]
 }
