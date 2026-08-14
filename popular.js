@@ -1,19 +1,12 @@
 /* =========================================================
-   SVE NA DLANU - POPULAR.JS
-   GA4 DATA API
+   SVE NA DLANU
+   POPULAR.JS - GA4
 
-   Property:
-   549759235
-
-   Radi:
-   - cita GA4
-   - uzima page_view podatke
-   - pronalazi stranice serija
-   - sortira po pregledima
-   - uzima TOP 20
-   - pravi popular.json
-   - radi automatski svaki dan u 10:45
-   - vreme: Europe/Belgrade
+   - Google Analytics 4 Data API
+   - Uzima najposecenije stranice
+   - Pretvara URL stranice u ID
+   - Cuva TOP 20 u popular.json
+   - GitHub Actions ga pokrece svaki dan
 ========================================================= */
 
 const fs = require("fs");
@@ -27,36 +20,9 @@ const { BetaAnalyticsDataClient } =
    PODESAVANJA
 ========================================================= */
 
-const PROPERTY_ID =
-    "549759235";
+const PROPERTY_ID = "549759235";
 
-const TIME_ZONE =
-    "Europe/Belgrade";
-
-const RUN_HOUR =
-    10;
-
-const RUN_MINUTE =
-    45;
-
-const TOP_LIMIT =
-    20;
-
-
-/* =========================================================
-   GOOGLE JSON KLJUC
-========================================================= */
-
-const CREDENTIALS_FILE =
-    path.join(
-        __dirname,
-        "serijeuploader-ddf5462126ed.json"
-    );
-
-
-/* =========================================================
-   OUTPUT
-========================================================= */
+const TOP_LIMIT = 20;
 
 const OUTPUT_FILE =
     path.join(
@@ -65,130 +31,65 @@ const OUTPUT_FILE =
     );
 
 
+const TIME_ZONE =
+    "Europe/Belgrade";
+
+
 /* =========================================================
-   PROVERA KLJUCA
+   GOOGLE SERVICE ACCOUNT
 ========================================================= */
 
-if (
-    !fs.existsSync(
-        CREDENTIALS_FILE
-    )
-) {
+function getCredentials() {
 
-    console.error("");
-    console.error(
-        "GRESKA: Google credentials fajl nije pronadjen."
-    );
+    const json =
+        process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
 
-    console.error(
-        "Ocekivano:"
-    );
 
-    console.error(
-        CREDENTIALS_FILE
-    );
+    if (!json) {
 
-    console.error("");
+        throw new Error(
+            "Nedostaje GOOGLE_SERVICE_ACCOUNT_JSON secret."
+        );
 
-    process.exit(1);
+    }
+
+
+    let credentials;
+
+
+    try {
+
+        credentials =
+            JSON.parse(json);
+
+    } catch (error) {
+
+        throw new Error(
+            "GOOGLE_SERVICE_ACCOUNT_JSON nije validan JSON."
+        );
+
+    }
+
+
+    if (
+        !credentials.client_email ||
+        !credentials.private_key
+    ) {
+
+        throw new Error(
+            "Google service account JSON nema client_email ili private_key."
+        );
+
+    }
+
+
+    return credentials;
 
 }
-
-
-/* =========================================================
-   GOOGLE ANALYTICS CLIENT
-========================================================= */
-
-const analyticsDataClient =
-    new BetaAnalyticsDataClient({
-
-        keyFilename:
-            CREDENTIALS_FILE
-
-    });
 
 
 /* =========================================================
    SRPSKO VREME
-========================================================= */
-
-function getSerbiaTime() {
-
-    const now =
-        new Date();
-
-    const formatter =
-        new Intl.DateTimeFormat(
-            "en-GB",
-            {
-
-                timeZone:
-                    TIME_ZONE,
-
-                hour:
-                    "2-digit",
-
-                minute:
-                    "2-digit",
-
-                second:
-                    "2-digit",
-
-                hour12:
-                    false
-
-            }
-        );
-
-    const parts =
-        formatter.formatToParts(
-            now
-        );
-
-    const result = {};
-
-    parts.forEach(
-        function(part) {
-
-            if (
-                part.type !==
-                "literal"
-            ) {
-
-                result[
-                    part.type
-                ] =
-                    part.value;
-
-            }
-
-        }
-    );
-
-    return {
-
-        hour:
-            Number(
-                result.hour
-            ),
-
-        minute:
-            Number(
-                result.minute
-            ),
-
-        second:
-            Number(
-                result.second
-            )
-
-    };
-
-}
-
-
-/* =========================================================
-   SRPSKI DATUM I VREME
 ========================================================= */
 
 function getSerbiaDateTime() {
@@ -196,7 +97,6 @@ function getSerbiaDateTime() {
     return new Intl.DateTimeFormat(
         "sr-RS",
         {
-
             timeZone:
                 TIME_ZONE,
 
@@ -220,7 +120,6 @@ function getSerbiaDateTime() {
 
             hour12:
                 false
-
         }
     ).format(
         new Date()
@@ -230,12 +129,62 @@ function getSerbiaDateTime() {
 
 
 /* =========================================================
-   GOOGLE ANALYTICS
+   ID IZ PAGE PATH
+========================================================= */
+
+function convertPageToId(
+    pagePath
+) {
+
+    if (!pagePath) {
+
+        return "";
+
+    }
+
+
+    let value =
+        String(
+            pagePath
+        ).trim();
+
+
+    /*
+     * Ako je:
+     *
+     * /moja-serija-001.html
+     *
+     * dobijamo:
+     *
+     * moja-serija-001.html
+     */
+
+    value =
+        value.replace(
+            /^\/+/,
+            ""
+        );
+
+
+    /*
+     * Ako GA vrati samo:
+     *
+     * index.html
+     *
+     * ostavljamo index.html
+     */
+
+    return value;
+
+}
+
+
+/* =========================================================
+   GA4 PODACI
 ========================================================= */
 
 async function getAnalyticsData() {
 
-    console.log("");
     console.log(
         "Povezujem se sa Google Analytics..."
     );
@@ -245,9 +194,39 @@ async function getAnalyticsData() {
         PROPERTY_ID
     );
 
+
+    const credentials =
+        getCredentials();
+
+
+    const analyticsDataClient =
+        new BetaAnalyticsDataClient(
+            {
+                credentials: {
+
+                    client_email:
+                        credentials.client_email,
+
+                    private_key:
+                        credentials.private_key
+
+                }
+            }
+        );
+
+
     console.log(
         "Citam podatke..."
     );
+
+
+    /*
+     * pagePath
+     * = URL putanja stranice
+     *
+     * screenPageViews
+     * = broj pregleda stranice
+     */
 
     const [
         response
@@ -261,7 +240,7 @@ async function getAnalyticsData() {
 
                 {
                     startDate:
-                        "30daysAgo",
+                        "yesterday",
 
                     endDate:
                         "yesterday"
@@ -293,114 +272,119 @@ async function getAnalyticsData() {
                     metric: {
 
                         metricName:
-                            "screenPageViews"
+                            "screenPageViews",
 
-                    },
+                        order:
+                            "DESCENDING"
 
-                    desc:
-                        true
+                    }
 
                 }
 
             ],
 
             limit:
-                1000
+                100
 
         });
 
 
-    return response.rows || [];
+    const rows =
+        response.rows || [];
+
+
+    console.log(
+        "GA4 redova:",
+        rows.length
+    );
+
+
+    return rows.map(
+        function(row) {
+
+            const pagePath =
+                row.dimensionValues?.[0]?.value ||
+                "";
+
+
+            const views =
+                Number(
+                    row.metricValues?.[0]?.value ||
+                    0
+                );
+
+
+            return {
+
+                id:
+                    convertPageToId(
+                        pagePath
+                    ),
+
+                visits:
+                    views
+
+            };
+
+        }
+    );
 
 }
 
 
 /* =========================================================
-   IZVADI ID SERIJE IZ URL-a
+   FILTRIRANJE
 ========================================================= */
 
-function extractSeriesId(
-    pagePath
+function filterSeriesPages(
+    data
 ) {
 
-    if (
-        !pagePath
-    ) {
+    return data.filter(
+        function(item) {
 
-        return null;
+            if (!item.id) {
 
-    }
+                return false;
 
-
-    const value =
-        String(
-            pagePath
-        );
+            }
 
 
-    /*
-     * Primer:
-     *
-     * /series/index.html?id=moja-sudbina
-     *
-     */
+            /*
+             * Ignorisemo glavnu stranicu.
+             */
+
+            if (
+                item.id ===
+                "index.html"
+            ) {
+
+                return false;
+
+            }
 
 
-    const match =
-        value.match(
-            /[?&]id=([^&#]+)/i
-        );
+            /*
+             * Uzimamo samo HTML stranice.
+             */
+
+            if (
+                !item.id
+                    .toLowerCase()
+                    .endsWith(
+                        ".html"
+                    )
+            ) {
+
+                return false;
+
+            }
 
 
-    if (
-        match &&
-        match[1]
-    ) {
-
-        try {
-
-            return decodeURIComponent(
-                match[1]
-            );
-
-        } catch {
-
-            return match[1];
+            return true;
 
         }
-
-    }
-
-
-    /*
-     * Ako nema ?id=
-     *
-     * proveravamo i putanju:
-     *
-     * /series/moja-sudbina/
-     *
-     */
-
-
-    const pathMatch =
-        value.match(
-            /\/series\/([^/?#]+)/i
-        );
-
-
-    if (
-        pathMatch &&
-        pathMatch[1]
-    ) {
-
-        return decodeURIComponent(
-            pathMatch[1]
-        );
-
-    }
-
-
-    return null;
+    );
 
 }
 
@@ -441,102 +425,40 @@ async function createPopularJSON() {
 
     try {
 
-        const rows =
+        /*
+         * Uzmi GA4
+         */
+
+        const analytics =
             await getAnalyticsData();
 
 
-        console.log(
-            "GA4 redova:",
-            rows.length
-        );
+        /*
+         * Filtriraj samo stranice serija
+         */
+
+        const seriesPages =
+            filterSeriesPages(
+                analytics
+            );
 
 
-        const seriesMap =
-            new Map();
-
-
-        rows.forEach(
-            function(row) {
-
-                const pagePath =
-                    row.dimensionValues &&
-                    row.dimensionValues[0]
-                        ?.
-                    value || "";
-
-
-                const views =
-                    row.metricValues &&
-                    row.metricValues[0]
-                        ?.
-                    value || "0";
-
-
-                const id =
-                    extractSeriesId(
-                        pagePath
-                    );
-
-
-                if (
-                    !id
-                ) {
-
-                    return;
-
-                }
-
-
-                const numberViews =
-                    Number(
-                        views
-                    ) || 0;
-
-
-                if (
-                    seriesMap.has(
-                        id
-                    )
-                ) {
-
-                    const old =
-                        seriesMap.get(
-                            id
-                        );
-
-
-                    old.visits +=
-                        numberViews;
-
-                } else {
-
-                    seriesMap.set(
-                        id,
-                        {
-
-                            id:
-                                id,
-
-                            visits:
-                                numberViews
-
-                        }
-                    );
-
-                }
-
-            }
-        );
-
+        /*
+         * Sortiraj
+         */
 
         const popular =
-            [...seriesMap.values()]
+            seriesPages
                 .sort(
-                    function(a,b) {
+                    function(a, b) {
 
                         return (
-                            b.visits -
-                            a.visits
+                            Number(
+                                b.visits || 0
+                            ) -
+                            Number(
+                                a.visits || 0
+                            )
                         );
 
                     }
@@ -564,6 +486,10 @@ async function createPopularJSON() {
         );
 
 
+        /*
+         * JSON
+         */
+
         const output = {
 
             updatedAt:
@@ -579,16 +505,36 @@ async function createPopularJSON() {
                 PROPERTY_ID,
 
             period:
-                "30 dana",
+                "yesterday",
 
             count:
                 popular.length,
 
             items:
-                popular
+                popular.map(
+                    function(item) {
+
+                        return {
+
+                            id:
+                                item.id,
+
+                            visits:
+                                Number(
+                                    item.visits || 0
+                                )
+
+                        };
+
+                    }
+                )
 
         };
 
+
+        /*
+         * Sacuvaj
+         */
 
         fs.writeFileSync(
 
@@ -611,7 +557,11 @@ async function createPopularJSON() {
         );
 
         console.log(
-            "USPESNO!"
+            " USPESNO!"
+        );
+
+        console.log(
+            "=========================================="
         );
 
         console.log(
@@ -647,103 +597,22 @@ async function createPopularJSON() {
         );
 
         console.error(
-            "GRESKA GA4:"
-        );
-
-        console.error(
-            error.message
+            " GRESKA"
         );
 
         console.error(
             "=========================================="
         );
 
-        console.error("");
-
-    }
-
-}
-
-
-/* =========================================================
-   TESTIRANJE
-========================================================= */
-
-async function runNow() {
-
-    await createPopularJSON();
-
-}
-
-
-/* =========================================================
-   AUTOMATSKO VREME
-========================================================= */
-
-let lastRunKey =
-    "";
-
-
-function checkTime() {
-
-    const time =
-        getSerbiaTime();
-
-
-    const now =
-        new Date();
-
-
-    const currentKey =
-        now
-            .toISOString()
-            .slice(
-                0,
-                10
-            ) +
-        "_" +
-        String(
-            RUN_HOUR
-        ).padStart(
-            2,
-            "0"
-        ) +
-        ":" +
-        String(
-            RUN_MINUTE
-        ).padStart(
-            2,
-            "0"
+        console.error(
+            error.message
         );
 
+        console.error("");
 
-    console.log(
-        `[Srbija] ${String(time.hour).padStart(2,"0")}:${String(time.minute).padStart(2,"0")}:${String(time.second).padStart(2,"0")}`
-    );
-
-
-    if (
-
-        time.hour ===
-        RUN_HOUR
-
-        &&
-
-        time.minute ===
-        RUN_MINUTE
-
-        &&
-
-        lastRunKey !==
-        currentKey
-
-    ) {
-
-        lastRunKey =
-            currentKey;
-
-
-        createPopularJSON();
+        process.exit(
+            1
+        );
 
     }
 
@@ -754,99 +623,4 @@ function checkTime() {
    START
 ========================================================= */
 
-console.log("");
-console.log(
-    "=========================================="
-);
-
-console.log(
-    " SVE NA DLANU - POPULAR.JS"
-);
-
-console.log(
-    "=========================================="
-);
-
-console.log(
-    "GA4 Property:",
-    PROPERTY_ID
-);
-
-console.log(
-    "Vremenska zona:",
-    TIME_ZONE
-);
-
-console.log(
-    "Automatsko vreme:",
-    "10:45"
-);
-
-console.log(
-    "TOP:",
-    TOP_LIMIT
-);
-
-console.log(
-    "Credentials:",
-    CREDENTIALS_FILE
-);
-
-console.log(
-    "Output:",
-    OUTPUT_FILE
-);
-
-console.log(
-    "=========================================="
-);
-
-console.log("");
-
-console.log(
-    "Skripta je pokrenuta."
-);
-
-console.log(
-    "Za test odmah:"
-);
-
-console.log(
-    "node popular.js --now"
-);
-
-console.log("");
-
-
-
-/* =========================================================
-   AKO JE --now
-========================================================= */
-
-if (
-    process.argv.includes(
-        "--now"
-    )
-) {
-
-    runNow();
-
-} else {
-
-    /*
-     * Proveri vreme odmah
-     */
-
-    checkTime();
-
-
-    /*
-     * Provera svake sekunde
-     */
-
-    setInterval(
-        checkTime,
-        1000
-    );
-
-}
+createPopularJSON();
