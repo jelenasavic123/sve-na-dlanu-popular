@@ -1,87 +1,33 @@
 {
-    "updatedAt": "2026-08-14T11:20:00.000Z",
-    "updatedAtSerbia": "14.08.2026. 13:20:00",
+    "updatedAt": "2026-08-15T09:46:42.183Z",
+    "updatedAtSerbia": "15.08.2026. 11:46:42",
     "timezone": "Europe/Belgrade",
     "propertyId": "549759235",
-
-    "allTime": {
-        "period": "Sve vreme",
-        "count": 10,
+    "popularnoOduvek": {
+        "title": "Popularno oduvek",
+        "count": 1,
         "items": [
             {
-                "id": "samo-17-daha-on-yedi",
-                "visits": 173
-            },
-            {
-                "id": "zakoni-prirode-doganin-kanunu",
-                "visits": 152
+                "id": "moja-serija-001",
+                "visits": 2
             }
         ]
     },
-
-    "last30Days": {
+    "popularno30Dana": {
+        "title": "Najgledanije 30 dana",
         "period": "30 dana",
-        "count": 10,
+        "count": 1,
         "items": [
             {
-                "id": "novi-zivot-yeni-hayat",
-                "visits": 25
-            },
-            {
-                "id": "obecavam-ti-sana-soz",
-                "visits": 18
-            },
-            {
-                "id": "pisma-iz-proslosti-gelecege-mektuplar",
-                "visits": 31
-            },
-            {
-                "id": "porodica-sakir-pasa-sakir-pasa-ailesi",
-                "visits": 42
-            },
-            {
-                "id": "rat-ruza-gullerin-savasi",
-                "visits": 56
-            },
-            {
-                "id": "samo-17-daha-on-yedi",
-                "visits": 73
-            },
-            {
-                "id": "sudbina-moje-cerke-goc-zamani",
-                "visits": 29
-            },
-            {
-                "id": "voljena-proslost-sevgili-gecmis",
-                "visits": 37
-            },
-            {
-                "id": "vreme-je-za-ljubav-seven-ne-yapmaz",
-                "visits": 21
-            },
-            {
-                "id": "zakoni-prirode-doganin-kanunu",
-                "visits": 64
+                "id": "moja-serija-001",
+                "visits": 2
             }
         ]
     },
-
-    "today": {
-        "period": "Danas",
-        "count": 10,
-        "items": [
-            {
-                "id": "samo-17-daha-on-yedi",
-                "visits": 14
-            },
-            {
-                "id": "rat-ruza-gullerin-savasi",
-                "visits": 12
-            },
-            {
-                "id": "zakoni-prirode-doganin-kanunu",
-                "visits": 9
-            }
-        ]
+    "popularnoDanas": {
+        "title": "Najgledanije danas",
+        "period": "danas",
+        "count": 0,
+        "items": []
     }
 }
