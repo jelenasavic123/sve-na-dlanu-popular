@@ -1,7 +1,6 @@
 /* =========================================================
    SVE NA DLANU
    POPULAR.JS - GA4
-
    =========================================================
 
    FUNKCIJA:
@@ -56,28 +55,27 @@
    10 serija po kategoriji.
 
 
-   DETALJNE PROVERE:
+   PROVERE:
 
-   1. GOOGLE_SERVICE_ACCOUNT_JSON postoji
-   2. JSON je validan
-   3. type postoji
-   4. project_id postoji
-   5. client_email postoji
-   6. private_key postoji
-   7. private_key PEM format
-   8. private_key newline struktura
-   9. GoogleAuth
-   10. Google OAuth token
-   11. GA4 Data API Client
-   12. GA4 Property pristup
-   13. Today podaci
-   14. Last 30 Days podaci
-   15. All Time podaci
-   16. Filtriranje stranica
-   17. Uklanjanje duplikata
-   18. TOP 10
-   19. popular.json
-   20. Validacija napravljenog JSON-a
+   1. GOOGLE_SERVICE_ACCOUNT_JSON
+   2. JSON format
+   3. project_id
+   4. client_email
+   5. private_key
+   6. private_key PEM
+   7. private_key newline
+   8. GoogleAuth
+   9. OAuth token
+   10. GA4 Data API Client
+   11. GA4 Property
+   12. Today
+   13. Last 30 Days
+   14. All Time
+   15. Filtriranje
+   16. Deduplikacija
+   17. TOP 10
+   18. popular.json
+   19. Validacija
 
 ========================================================= */
 
@@ -107,14 +105,14 @@ const PROPERTY_ID = "549759235";
 
 
 /*
- * Koliko serija prikazujemo
+ * Koliko serija ide u popular.json
  */
 
 const TOP_LIMIT = 10;
 
 
 /*
- * Gde se pravi popular.json
+ * Izlazni JSON fajl
  */
 
 const OUTPUT_FILE = path.join(
@@ -124,24 +122,28 @@ const OUTPUT_FILE = path.join(
 
 
 /*
- * Vremenska zona Srbije
+ * Vremenska zona
  */
 
 const TIME_ZONE = "Europe/Belgrade";
 
 
 /*
- * Pocetak istorijskog perioda.
- *
- * Ako je GA4 Property napravljen kasnije,
- * Google ce vratiti samo podatke koji postoje.
+ * Pocetak All Time statistike
  */
 
 const ALL_TIME_START_DATE = "2020-01-01";
 
 
+/*
+ * Maksimalan broj GA4 redova
+ */
+
+const GA4_LIMIT = 10000;
+
+
 /* =========================================================
-   NASLOVI LOGOVA
+   LOGOVI
 ========================================================= */
 
 function separator() {
@@ -167,7 +169,7 @@ function section(title) {
 
 
 /* =========================================================
-   MASKIRANI EMAIL
+   MASKIRANJE EMAILA
 ========================================================= */
 
 function maskEmail(email) {
@@ -178,14 +180,9 @@ function maskEmail(email) {
 
     }
 
+    const value = String(email);
 
-    const value =
-        String(email);
-
-
-    const parts =
-        value.split("@");
-
+    const parts = value.split("@");
 
     if (parts.length !== 2) {
 
@@ -193,30 +190,77 @@ function maskEmail(email) {
 
     }
 
+    const name = parts[0];
 
-    const name =
-        parts[0];
-
-
-    const domain =
-        parts[1];
-
+    const domain = parts[1];
 
     if (name.length <= 2) {
 
-        return (
-            "***@" +
-            domain
-        );
+        return "***@" + domain;
 
     }
-
 
     return (
         name.substring(0, 2) +
         "***@" +
         domain
     );
+
+}
+
+
+/* =========================================================
+   NORMALIZACIJA PRIVATE KEY
+========================================================= */
+
+/*
+ * Ovo je veoma vazno.
+ *
+ * Ako GitHub Secret sadrzi:
+ *
+ * -----BEGIN PRIVATE KEY-----\nABC...\n-----END PRIVATE KEY-----
+ *
+ * pretvara \n u stvarne newline karaktere.
+ */
+
+function normalizePrivateKey(privateKey) {
+
+    if (!privateKey) {
+
+        throw new Error(
+            "private_key ne postoji."
+        );
+
+    }
+
+    let key = String(privateKey);
+
+    /*
+     * Ako postoje literalni \n
+     * pretvori ih u stvarne newline.
+     */
+
+    key = key.replace(
+        /\\n/g,
+        "\n"
+    );
+
+    /*
+     * Windows newline
+     */
+
+    key = key.replace(
+        /\r\n/g,
+        "\n"
+    );
+
+    /*
+     * Ukloni eventualne razmake na pocetku/kraju
+     */
+
+    key = key.trim();
+
+    return key;
 
 }
 
@@ -233,7 +277,7 @@ function getCredentials() {
 
 
     /* -----------------------------------------------------
-       UZMI SECRET
+       SECRET
     ----------------------------------------------------- */
 
     const json =
@@ -246,18 +290,15 @@ function getCredentials() {
             "❌ GOOGLE_SERVICE_ACCOUNT_JSON NE POSTOJI."
         );
 
-
         console.error("");
 
         console.error(
             "Proveri:"
         );
 
-
         console.error(
             "GitHub → Settings → Secrets and variables → Actions"
         );
-
 
         throw new Error(
             "Nedostaje GOOGLE_SERVICE_ACCOUNT_JSON secret."
@@ -279,7 +320,7 @@ function getCredentials() {
 
 
     /* -----------------------------------------------------
-       PARSIRANJE JSON-A
+       JSON PARSIRANJE
     ----------------------------------------------------- */
 
     let credentials;
@@ -296,16 +337,9 @@ function getCredentials() {
             "❌ Secret nije validan JSON."
         );
 
-
-        console.error(
-            "JSON.parse greska:"
-        );
-
-
         console.error(
             error.message
         );
-
 
         throw new Error(
             "GOOGLE_SERVICE_ACCOUNT_JSON nije validan JSON."
@@ -320,43 +354,27 @@ function getCredentials() {
 
 
     /* -----------------------------------------------------
-       TYPE
-    ----------------------------------------------------- */
-
-    if (credentials.type) {
-
-        console.log(
-            "type:",
-            credentials.type
-        );
-
-    } else {
-
-        console.warn(
-            "⚠️ type nije pronadjen."
-        );
-
-    }
-
-
-    /* -----------------------------------------------------
        PROJECT ID
     ----------------------------------------------------- */
 
-    if (credentials.project_id) {
+    if (!credentials.project_id) {
 
-        console.log(
-            "project_id:",
-            credentials.project_id
-        );
-
-    } else {
-
-        console.warn(
-            "⚠️ project_id nije pronadjen."
+        throw new Error(
+            "Service Account JSON nema project_id."
         );
 
     }
+
+
+    console.log(
+        "project_id:",
+        credentials.project_id
+    );
+
+
+    console.log(
+        "✅ project_id postoji."
+    );
 
 
     /* -----------------------------------------------------
@@ -364,11 +382,6 @@ function getCredentials() {
     ----------------------------------------------------- */
 
     if (!credentials.client_email) {
-
-        console.error(
-            "❌ client_email NE POSTOJI."
-        );
-
 
         throw new Error(
             "Service Account JSON nema client_email."
@@ -396,11 +409,6 @@ function getCredentials() {
 
     if (!credentials.private_key) {
 
-        console.error(
-            "❌ private_key NE POSTOJI."
-        );
-
-
         throw new Error(
             "Service Account JSON nema private_key."
         );
@@ -414,32 +422,40 @@ function getCredentials() {
 
 
     console.log(
-        "private_key duzina:",
-        credentials.private_key.length,
-        "karaktera"
+        "Originalna private_key duzina:",
+        credentials.private_key.length
     );
 
 
     /* -----------------------------------------------------
-       PRIVATE KEY FORMAT
+       NORMALIZACIJA
     ----------------------------------------------------- */
 
-    const privateKey =
-        String(
+    credentials.private_key =
+        normalizePrivateKey(
             credentials.private_key
         );
 
 
+    console.log(
+        "Normalizovana private_key duzina:",
+        credentials.private_key.length
+    );
+
+
+    /* -----------------------------------------------------
+       BEGIN
+    ----------------------------------------------------- */
+
     if (
-        !privateKey.includes(
-            "BEGIN PRIVATE KEY"
+        !credentials.private_key.includes(
+            "-----BEGIN PRIVATE KEY-----"
         )
     ) {
 
         console.error(
             "❌ Private key nema BEGIN PRIVATE KEY."
         );
-
 
         throw new Error(
             "Private key nema ispravan PEM format."
@@ -448,16 +464,19 @@ function getCredentials() {
     }
 
 
+    /* -----------------------------------------------------
+       END
+    ----------------------------------------------------- */
+
     if (
-        !privateKey.includes(
-            "END PRIVATE KEY"
+        !credentials.private_key.includes(
+            "-----END PRIVATE KEY-----"
         )
     ) {
 
         console.error(
             "❌ Private key nema END PRIVATE KEY."
         );
-
 
         throw new Error(
             "Private key nema ispravan PEM format."
@@ -472,12 +491,14 @@ function getCredentials() {
 
 
     /* -----------------------------------------------------
-       NEWLINE PROVERA
+       NEWLINE
     ----------------------------------------------------- */
 
     const literalNewLines =
         (
-            privateKey.match(
+            String(
+                json
+            ).match(
                 /\\n/g
             ) || []
         ).length;
@@ -485,26 +506,35 @@ function getCredentials() {
 
     const realNewLines =
         (
-            privateKey.match(
+            credentials.private_key.match(
                 /\n/g
             ) || []
         ).length;
 
 
     console.log(
-        "Private key literalni \\n:",
+        "Literalni \\n u Secret-u:",
         literalNewLines
     );
 
 
     console.log(
-        "Private key stvarni newline:",
+        "Stvarni newline u private key:",
         realNewLines
     );
 
 
+    if (realNewLines < 2) {
+
+        throw new Error(
+            "Private key nema dovoljno newline karaktera."
+        );
+
+    }
+
+
     console.log(
-        "✅ Private key struktura proverena."
+        "✅ Private key newline struktura je ispravna."
     );
 
 
@@ -538,7 +568,6 @@ function createGoogleAuth(credentials) {
                         credentials.private_key
 
                 },
-
 
                 scopes: [
 
@@ -743,7 +772,7 @@ function convertPageToId(pagePath) {
 
 
     /* -----------------------------------------------------
-       UKLONI POCETNE /
+       SKINI POČETNI /
     ----------------------------------------------------- */
 
     value =
@@ -798,18 +827,37 @@ function convertPageToId(pagePath) {
 
 
     /* -----------------------------------------------------
+       HASH
+    ----------------------------------------------------- */
+
+    const hashIndex =
+        value.indexOf("#");
+
+
+    if (hashIndex !== -1) {
+
+        value =
+            value.substring(
+                0,
+                hashIndex
+            );
+
+    }
+
+
+    /* -----------------------------------------------------
        NEVALIDNE STRANICE
     ----------------------------------------------------- */
 
     if (
 
+        value === "" ||
+
         value === "series" ||
 
         value === "series/" ||
 
-        value === "index.html" ||
-
-        value === ""
+        value === "index.html"
 
     ) {
 
@@ -960,7 +1008,7 @@ async function testGA4Property(
                     {
 
                         startDate:
-                            "1daysAgo",
+                            "yesterday",
 
                         endDate:
                             "yesterday"
@@ -1039,10 +1087,6 @@ async function testGA4Property(
         );
 
 
-        /* -------------------------------------------------
-           16 UNAUTHENTICATED
-        ------------------------------------------------- */
-
         if (
             Number(error.code) === 16
         ) {
@@ -1053,11 +1097,9 @@ async function testGA4Property(
                 "❌ 16 UNAUTHENTICATED"
             );
 
-
             console.error(
                 "Google nije prihvatio kredencijale."
             );
-
 
             console.error(
                 "Proveri client_email i private_key."
@@ -1065,10 +1107,6 @@ async function testGA4Property(
 
         }
 
-
-        /* -------------------------------------------------
-           7 PERMISSION DENIED
-        ------------------------------------------------- */
 
         if (
             Number(error.code) === 7
@@ -1080,22 +1118,14 @@ async function testGA4Property(
                 "❌ 7 PERMISSION_DENIED"
             );
 
-
             console.error(
-                "Service Account se autentifikovao,"
+                "Service Account nema pristup GA4 Property-ju."
             );
-
-
-            console.error(
-                "ali nema pristup GA4 Property-ju."
-            );
-
 
             console.error(
                 "Property:",
                 PROPERTY_ID
             );
-
 
             console.error("");
 
@@ -1103,17 +1133,12 @@ async function testGA4Property(
                 "Dodaj Service Account email u:"
             );
 
-
             console.error(
                 "Google Analytics → Admin → Property Access Management"
             );
 
         }
 
-
-        /* -------------------------------------------------
-           5 NOT FOUND
-        ------------------------------------------------- */
 
         if (
             Number(error.code) === 5
@@ -1125,11 +1150,9 @@ async function testGA4Property(
                 "❌ 5 NOT_FOUND"
             );
 
-
             console.error(
                 "GA4 Property nije pronadjen."
             );
-
 
             console.error(
                 "Proveri PROPERTY_ID:",
@@ -1249,7 +1272,7 @@ async function getPeriodData(
                 ],
 
                 limit:
-                    10000
+                    GA4_LIMIT
 
             });
 
@@ -1267,6 +1290,29 @@ async function getPeriodData(
             "Broj GA4 redova:",
             rows.length
         );
+
+
+        if (
+            rows.length >= GA4_LIMIT
+        ) {
+
+            console.warn("");
+
+            console.warn(
+                "⚠️ Dostignut je GA4 LIMIT od",
+                GA4_LIMIT,
+                "redova."
+            );
+
+            console.warn(
+                "Ako sajt ima vise od 10.000 razlicitih pagePath-ova,"
+            );
+
+            console.warn(
+                "moze biti potrebno dodati paginaciju."
+            );
+
+        }
 
 
         return rows.map(
@@ -1368,7 +1414,16 @@ function filterSeriesPages(data) {
             const id =
                 String(
                     item.id
-                ).toLowerCase();
+                )
+                .trim()
+                .toLowerCase();
+
+
+            if (!id) {
+
+                return false;
+
+            }
 
 
             /* -------------------------------------------------
@@ -1394,31 +1449,37 @@ function filterSeriesPages(data) {
                IGNORISI FAJLOVE
             ------------------------------------------------- */
 
-            if (
+            const forbiddenExtensions = [
 
-                id.includes(".css") ||
+                ".css",
+                ".js",
+                ".png",
+                ".jpg",
+                ".jpeg",
+                ".webp",
+                ".gif",
+                ".svg",
+                ".ico",
+                ".json",
+                ".xml",
+                ".txt",
+                ".map"
 
-                id.includes(".js") ||
+            ];
 
-                id.includes(".png") ||
 
-                id.includes(".jpg") ||
-
-                id.includes(".jpeg") ||
-
-                id.includes(".webp") ||
-
-                id.includes(".gif") ||
-
-                id.includes(".svg") ||
-
-                id.includes(".ico") ||
-
-                id.includes(".json")
-
+            for (
+                const extension
+                of forbiddenExtensions
             ) {
 
-                return false;
+                if (
+                    id.includes(extension)
+                ) {
+
+                    return false;
+
+                }
 
             }
 
@@ -1449,7 +1510,8 @@ function removeDuplicates(data) {
             const id =
                 String(
                     item.id || ""
-                ).trim();
+                )
+                .trim();
 
 
             if (!id) {
@@ -1473,7 +1535,8 @@ function removeDuplicates(data) {
 
                 /*
                  * Ako isti ID postoji na vise
-                 * pagePath putanja, sabiramo preglede.
+                 * pagePath putanja,
+                 * sabiramo preglede.
                  */
 
                 old.visits += views;
@@ -1581,7 +1644,6 @@ function printTop(
             "Nema podataka."
         );
 
-
         return;
 
     }
@@ -1605,7 +1667,7 @@ function printTop(
 
 
 /* =========================================================
-   FORMATIRANJE ZA NOVI JSON FORMAT
+   FORMAT LISTE
 ========================================================= */
 
 function formatList(data) {
@@ -1645,7 +1707,7 @@ function validatePopularJSON(data) {
 
 
     /* -----------------------------------------------------
-       PROVERA GLAVNIH KLJUCEVA
+       GLAVNI OBJEKAT
     ----------------------------------------------------- */
 
     if (!data) {
@@ -1657,6 +1719,10 @@ function validatePopularJSON(data) {
     }
 
 
+    /* -----------------------------------------------------
+       TODAY
+    ----------------------------------------------------- */
+
     if (!Array.isArray(data.today)) {
 
         throw new Error(
@@ -1666,6 +1732,10 @@ function validatePopularJSON(data) {
     }
 
 
+    /* -----------------------------------------------------
+       LAST 30 DAYS
+    ----------------------------------------------------- */
+
     if (!Array.isArray(data.last30Days)) {
 
         throw new Error(
@@ -1674,6 +1744,10 @@ function validatePopularJSON(data) {
 
     }
 
+
+    /* -----------------------------------------------------
+       ALL TIME
+    ----------------------------------------------------- */
 
     if (!Array.isArray(data.allTime)) {
 
@@ -1700,7 +1774,7 @@ function validatePopularJSON(data) {
 
 
     /* -----------------------------------------------------
-       PROVERA ELEMENATA
+       PROVERA SVIH ELEMENATA
     ----------------------------------------------------- */
 
     const allLists = [
@@ -1761,6 +1835,19 @@ function validatePopularJSON(data) {
                         throw new Error(
 
                             `Lista ${list.name}, ID ${item.id} nema validan views.`
+
+                        );
+
+                    }
+
+
+                    if (
+                        item.views < 0
+                    ) {
+
+                        throw new Error(
+
+                            `Lista ${list.name}, ID ${item.id} ima negativan views.`
 
                         );
 
@@ -1876,16 +1963,6 @@ function createPopularJSON(
     );
 
 
-    /* =====================================================
-       TRAZENI FORMAT
-
-       {
-           "today": [],
-           "last30Days": [],
-           "allTime": []
-       }
-    ===================================================== */
-
     const output = {
 
         today:
@@ -1893,12 +1970,10 @@ function createPopularJSON(
                 popularDanas
             ),
 
-
         last30Days:
             formatList(
                 popular30Dana
             ),
-
 
         allTime:
             formatList(
@@ -1908,9 +1983,9 @@ function createPopularJSON(
     };
 
 
-    /* =====================================================
-       SACUVaj
-    ===================================================== */
+    /* -----------------------------------------------------
+       SACUVAJ
+    ----------------------------------------------------- */
 
     fs.writeFileSync(
 
@@ -1940,7 +2015,6 @@ function createPopularJSON(
 
     console.log("");
 
-
     console.log(
         "=========================================="
     );
@@ -1969,9 +2043,9 @@ function createPopularJSON(
     );
 
 
-    /* =====================================================
-       PRIKAZ
-    ===================================================== */
+    /* -----------------------------------------------------
+       PRIKAZ TOP LISTA
+    ----------------------------------------------------- */
 
     printTop(
         "TOP 10 - TODAY",
@@ -1991,9 +2065,9 @@ function createPopularJSON(
     );
 
 
-    /* =====================================================
+    /* -----------------------------------------------------
        VALIDACIJA
-    ===================================================== */
+    ----------------------------------------------------- */
 
     validatePopularJSON(
         output
@@ -2037,6 +2111,12 @@ async function createPopularJSONProcess() {
     console.log(
         "Timezone:",
         TIME_ZONE
+    );
+
+
+    console.log(
+        "All Time start:",
+        ALL_TIME_START_DATE
     );
 
 
@@ -2238,6 +2318,11 @@ async function createPopularJSONProcess() {
 
 
         console.log(
+            "✅ project_id: OK"
+        );
+
+
+        console.log(
             "✅ client_email: OK"
         );
 
@@ -2249,6 +2334,11 @@ async function createPopularJSONProcess() {
 
         console.log(
             "✅ Private key format: OK"
+        );
+
+
+        console.log(
+            "✅ Private key newline: OK"
         );
 
 
@@ -2371,7 +2461,6 @@ async function createPopularJSONProcess() {
 
 
         console.error("");
-
 
         console.error(
             "=========================================="
@@ -2533,7 +2622,6 @@ async function createPopularJSONProcess() {
 
 
         console.error("");
-
 
         console.error(
             "=========================================="
