@@ -4,94 +4,66 @@
 
    AUTOMATSKO PRAVLJENJE popular.json
 
-   FORMAT KOJI GLAVNI SCRIPT OCEKUJE:
+   IZLAZ:
 
    {
-       "today": {
-           "items": [
-               {
-                   "id": "ayse",
-                   "views": 1520
-               }
-           ]
-       },
+       "today": [
+           {
+               "id": "ayse",
+               "views": 1520
+           }
+       ],
 
-       "last30Days": {
-           "items": [
-               {
-                   "id": "ayse",
-                   "views": 24580
-               }
-           ]
-       },
+       "last30Days": [
+           {
+               "id": "ayse",
+               "views": 24580
+           }
+       ],
 
-       "allTime": {
-           "items": [
-               {
-                   "id": "ayse",
-                   "views": 135240
-               }
-           ]
-       }
+       "allTime": [
+           {
+               "id": "ayse",
+               "views": 135240
+           }
+       ]
    }
 
 ========================================================= */
 
-
 const fs = require("fs");
-
 const path = require("path");
-
 
 const {
     BetaAnalyticsDataClient
 } = require("@google-analytics/data");
-
 
 const {
     GoogleAuth
 } = require("google-auth-library");
 
 
-
 /* =========================================================
    PODESAVANJA
 ========================================================= */
 
+const PROPERTY_ID = "549759235";
 
-const PROPERTY_ID =
-    "549759235";
+const TOP_LIMIT = 10;
 
+const OUTPUT_FILE = path.join(
+    __dirname,
+    "popular.json"
+);
 
-const TOP_LIMIT =
-    10;
+const TIME_ZONE = "Europe/Belgrade";
 
-
-const OUTPUT_FILE =
-    path.join(
-        __dirname,
-        "popular.json"
-    );
-
-
-const TIME_ZONE =
-    "Europe/Belgrade";
-
-
-/*
- * GA4 ne mora imati podatke od ovog datuma.
- * Google ce vratiti samo ono sto postoji.
- */
-
-const ALL_TIME_START_DATE =
-    "2020-01-01";
-
+const ALL_TIME_START_DATE = "2020-01-01";
 
 
 /* =========================================================
    LOG
 ========================================================= */
-
 
 function separator() {
 
@@ -108,20 +80,16 @@ function section(title) {
 
     separator();
 
-    console.log(
-        title
-    );
+    console.log(title);
 
     separator();
 
 }
 
 
-
 /* =========================================================
    MASK EMAIL
 ========================================================= */
-
 
 function maskEmail(email) {
 
@@ -131,75 +99,44 @@ function maskEmail(email) {
 
     }
 
+    const value = String(email);
 
-    const value =
-        String(
-            email
-        );
+    const parts = value.split("@");
 
-
-    const parts =
-        value.split("@");
-
-
-    if (
-        parts.length !== 2
-    ) {
+    if (parts.length !== 2) {
 
         return "***";
 
     }
 
+    const name = parts[0];
 
-    const name =
-        parts[0];
+    const domain = parts[1];
 
-
-    const domain =
-        parts[1];
-
-
-    if (
-        name.length <= 2
-    ) {
+    if (name.length <= 2) {
 
         return "***@" + domain;
 
     }
 
-
     return (
-
-        name.substring(
-            0,
-            2
-        )
-
-        +
-
-        "***@"
-
-        +
-
+        name.substring(0, 2) +
+        "***@" +
         domain
-
     );
 
 }
-
 
 
 /* =========================================================
    CREDENTIALS
 ========================================================= */
 
-
 function getCredentials() {
 
     section(
         "1. GOOGLE SERVICE ACCOUNT"
     );
-
 
     const json =
         process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
@@ -215,7 +152,7 @@ function getCredentials() {
 
 
     console.log(
-        "✅ GOOGLE_SERVICE_ACCOUNT_JSON postoji."
+        "GOOGLE_SERVICE_ACCOUNT_JSON postoji."
     );
 
 
@@ -232,9 +169,7 @@ function getCredentials() {
     try {
 
         credentials =
-            JSON.parse(
-                json
-            );
+            JSON.parse(json);
 
     } catch (error) {
 
@@ -246,13 +181,11 @@ function getCredentials() {
 
 
     console.log(
-        "✅ JSON je validan."
+        "JSON je validan."
     );
 
 
-    if (
-        !credentials.client_email
-    ) {
+    if (!credentials.client_email) {
 
         throw new Error(
             "client_email ne postoji."
@@ -261,9 +194,7 @@ function getCredentials() {
     }
 
 
-    if (
-        !credentials.private_key
-    ) {
+    if (!credentials.private_key) {
 
         throw new Error(
             "private_key ne postoji."
@@ -318,7 +249,7 @@ function getCredentials() {
 
 
     console.log(
-        "✅ Private key PEM format OK."
+        "Private key PEM format OK."
     );
 
 
@@ -327,15 +258,11 @@ function getCredentials() {
 }
 
 
-
 /* =========================================================
    GOOGLE AUTH
 ========================================================= */
 
-
-function createGoogleAuth(
-    credentials
-) {
+function createGoogleAuth(credentials) {
 
     section(
         "2. GOOGLE AUTH"
@@ -367,7 +294,7 @@ function createGoogleAuth(
 
 
         console.log(
-            "✅ GoogleAuth napravljen."
+            "GoogleAuth napravljen."
         );
 
 
@@ -386,15 +313,11 @@ function createGoogleAuth(
 }
 
 
-
 /* =========================================================
    OAUTH TOKEN
 ========================================================= */
 
-
-async function testGoogleAuthentication(
-    auth
-) {
+async function testGoogleAuthentication(auth) {
 
     section(
         "3. GOOGLE OAUTH TOKEN"
@@ -433,7 +356,7 @@ async function testGoogleAuthentication(
 
 
         console.log(
-            "✅ OAuth token uspesno dobijen."
+            "OAuth token uspesno dobijen."
         );
 
 
@@ -455,15 +378,11 @@ async function testGoogleAuthentication(
 }
 
 
-
 /* =========================================================
    GA4 CLIENT
 ========================================================= */
 
-
-function createAnalyticsClient(
-    credentials
-) {
+function createAnalyticsClient(credentials) {
 
     section(
         "4. GA4 DATA API CLIENT"
@@ -489,7 +408,7 @@ function createAnalyticsClient(
 
 
         console.log(
-            "✅ GA4 client napravljen."
+            "GA4 client napravljen."
         );
 
 
@@ -514,11 +433,9 @@ function createAnalyticsClient(
 }
 
 
-
 /* =========================================================
    PROVERA PROPERTY
 ========================================================= */
-
 
 async function testGA4Property(
     analyticsDataClient
@@ -578,16 +495,13 @@ async function testGA4Property(
 
 
         console.log(
-            "✅ GA4 Property pristup OK."
+            "GA4 Property pristup OK."
         );
 
 
         console.log(
             "Test redova:",
-            (
-                response.rows ||
-                []
-            ).length
+            (response.rows || []).length
         );
 
 
@@ -597,7 +511,7 @@ async function testGA4Property(
     } catch (error) {
 
         console.error(
-            "❌ GA4 Property greska."
+            "GA4 Property greska."
         );
 
 
@@ -620,15 +534,11 @@ async function testGA4Property(
 }
 
 
-
 /* =========================================================
-   PAGE PATH → ID
+   PAGE PATH -> ID
 ========================================================= */
 
-
-function convertPageToId(
-    pagePath
-) {
+function convertPageToId(pagePath) {
 
     if (!pagePath) {
 
@@ -643,28 +553,19 @@ function convertPageToId(
         ).trim();
 
 
-    /*
-     * Ukloni domen ako se nekim slucajem pojavi
-     */
+    /* -----------------------------------------
+       AKO JE CEO URL
+    ----------------------------------------- */
 
     try {
 
         if (
-            value.startsWith(
-                "http://"
-            )
-
-            ||
-
-            value.startsWith(
-                "https://"
-            )
+            value.startsWith("http://") ||
+            value.startsWith("https://")
         ) {
 
             const url =
-                new URL(
-                    value
-                );
+                new URL(value);
 
 
             value =
@@ -675,35 +576,19 @@ function convertPageToId(
 
     } catch (error) {
 
-        // Nije URL - nastavljamo normalno
-
+        // Nije URL
     }
 
 
-    /*
-     * Ukloni pocetni /
-     */
-
-    value =
-        value.replace(
-            /^\/+/,
-            ""
-        );
-
-
-    /*
-     * Query string
-     */
+    /* -----------------------------------------
+       QUERY
+    ----------------------------------------- */
 
     const questionIndex =
-        value.indexOf(
-            "?"
-        );
+        value.indexOf("?");
 
 
-    if (
-        questionIndex !== -1
-    ) {
+    if (questionIndex !== -1) {
 
         const query =
             value.substring(
@@ -711,28 +596,29 @@ function convertPageToId(
             );
 
 
-        const params =
-            new URLSearchParams(
-                query
-            );
+        try {
+
+            const params =
+                new URLSearchParams(
+                    query
+                );
 
 
-        /*
-         * Ako imamo ?id=ayse
-         */
-
-        const id =
-            params.get(
-                "id"
-            );
+            const id =
+                params.get("id");
 
 
-        if (id) {
+            if (id) {
 
-            return String(
-                id
-            ).trim();
+                return String(
+                    id
+                ).trim();
 
+            }
+
+        } catch (error) {
+
+            // Nastavljamo dalje
         }
 
 
@@ -745,19 +631,15 @@ function convertPageToId(
     }
 
 
-    /*
-     * Ukloni hash
-     */
+    /* -----------------------------------------
+       HASH
+    ----------------------------------------- */
 
     const hashIndex =
-        value.indexOf(
-            "#"
-        );
+        value.indexOf("#");
 
 
-    if (
-        hashIndex !== -1
-    ) {
+    if (hashIndex !== -1) {
 
         value =
             value.substring(
@@ -768,9 +650,20 @@ function convertPageToId(
     }
 
 
-    /*
-     * Ukloni index.html
-     */
+    /* -----------------------------------------
+       UKLONI /
+    ----------------------------------------- */
+
+    value =
+        value.replace(
+            /^\/+/,
+            ""
+        );
+
+
+    /* -----------------------------------------
+       INDEX.HTML
+    ----------------------------------------- */
 
     value =
         value.replace(
@@ -779,9 +672,9 @@ function convertPageToId(
         );
 
 
-    /*
-     * Ukloni .html
-     */
+    /* -----------------------------------------
+       .HTML
+    ----------------------------------------- */
 
     value =
         value.replace(
@@ -790,32 +683,26 @@ function convertPageToId(
         );
 
 
-    /*
-     * Ako postoji:
-     *
-     * /series/moja-serija
-     *
-     * uzmi samo:
-     *
-     * moja-serija
-     */
+    /* -----------------------------------------
+       DEL0VI PUTANJE
+    ----------------------------------------- */
 
     const parts =
         value
             .split("/")
-            .filter(
-                Boolean
-            );
+            .filter(Boolean);
 
 
-    if (
-        !parts.length
-    ) {
+    if (!parts.length) {
 
         return "";
 
     }
 
+
+    /* -----------------------------------------
+       UZMI POSLEDNJI DEO
+    ----------------------------------------- */
 
     value =
         parts[
@@ -830,15 +717,11 @@ function convertPageToId(
 }
 
 
-
 /* =========================================================
-   DA LI JE VALIDNA SERIJA
+   VALIDAN ID SERIJE
 ========================================================= */
 
-
-function isValidSeriesId(
-    id
-) {
+function isValidSeriesId(id) {
 
     if (!id) {
 
@@ -862,9 +745,9 @@ function isValidSeriesId(
     }
 
 
-    /*
-     * Pocetne stranice
-     */
+    /* -----------------------------------------
+       STRANICE KOJE NE ZELIMO
+    ----------------------------------------- */
 
     const forbidden = [
 
@@ -873,7 +756,11 @@ function isValidSeriesId(
         "series",
         "home",
         "search",
-        "popular"
+        "popular",
+        "about",
+        "login",
+        "404",
+        "404.html"
 
     ];
 
@@ -889,9 +776,9 @@ function isValidSeriesId(
     }
 
 
-    /*
-     * Staticki fajlovi
-     */
+    /* -----------------------------------------
+       FAJLOVI KOJE NE ZELIMO
+    ----------------------------------------- */
 
     const forbiddenExtensions = [
 
@@ -911,7 +798,8 @@ function isValidSeriesId(
         ".woff2",
         ".ttf",
         ".mp4",
-        ".m3u8"
+        ".m3u8",
+        ".map"
 
     ];
 
@@ -939,11 +827,9 @@ function isValidSeriesId(
 }
 
 
-
 /* =========================================================
    UCITAJ GA4 PERIOD
 ========================================================= */
-
 
 async function getPeriodData(
 
@@ -963,19 +849,16 @@ async function getPeriodData(
         "------------------------------------------"
     );
 
-
     console.log(
         nazivPerioda
     );
 
-
     console.log(
         "Period:",
         startDate,
-        "→",
+        "->",
         endDate
     );
-
 
     console.log(
         "------------------------------------------"
@@ -1049,8 +932,7 @@ async function getPeriodData(
 
 
         const rows =
-            response.rows ||
-            [];
+            response.rows || [];
 
 
         console.log(
@@ -1059,8 +941,7 @@ async function getPeriodData(
         );
 
 
-        const result =
-            [];
+        const result = [];
 
 
         rows.forEach(
@@ -1070,8 +951,7 @@ async function getPeriodData(
                 const pagePath =
                     row
                         .dimensionValues?.[0]
-                        ?.value ||
-                    "";
+                        ?.value || "";
 
 
                 const views =
@@ -1079,8 +959,7 @@ async function getPeriodData(
 
                         row
                             .metricValues?.[0]
-                            ?.value ||
-                        0
+                            ?.value || 0
 
                     );
 
@@ -1091,15 +970,12 @@ async function getPeriodData(
                     );
 
 
-                /*
-                 * Ne dozvoljavamo da bilo koja
-                 * stranica udje u popular.json.
-                 */
+                /* -----------------------------------------
+                   SAMO VALIDNE SERIJE
+                ----------------------------------------- */
 
                 if (
-                    !isValidSeriesId(
-                        id
-                    )
+                    !isValidSeriesId(id)
                 ) {
 
                     return;
@@ -1117,9 +993,6 @@ async function getPeriodData(
 
 
                 result.push({
-
-                    originalPath:
-                        pagePath,
 
                     id:
                         id,
@@ -1146,7 +1019,7 @@ async function getPeriodData(
     } catch (error) {
 
         console.error(
-            "❌ Greska perioda:",
+            "Greska perioda:",
             nazivPerioda
         );
 
@@ -1170,32 +1043,41 @@ async function getPeriodData(
 }
 
 
-
 /* =========================================================
    UKLANJANJE DUPLIKATA
 ========================================================= */
 
-
-function removeDuplicates(
-    data
-) {
+function removeDuplicates(data) {
 
     const map =
         new Map();
+
+
+    if (!Array.isArray(data)) {
+
+        return [];
+
+    }
 
 
     data.forEach(
 
         function(item) {
 
+            if (!item) {
+
+                return;
+
+            }
+
+
             const id =
                 String(
-                    item.id ||
-                    ""
+                    item.id || ""
                 ).trim();
 
 
-            if (!id) {
+            if (!isValidSeriesId(id)) {
 
                 return;
 
@@ -1204,12 +1086,12 @@ function removeDuplicates(
 
             const views =
                 Number(
-                    item.visits ||
-                    0
+                    item.visits || 0
                 );
 
 
             if (
+                !Number.isFinite(views) ||
                 views <= 0
             ) {
 
@@ -1218,16 +1100,11 @@ function removeDuplicates(
             }
 
 
-            const old =
-                map.get(
-                    id
-                );
+            if (
+                map.has(id)
+            ) {
 
-
-            if (old) {
-
-                old.visits +=
-                    views;
+                map.get(id).visits += views;
 
             } else {
 
@@ -1261,15 +1138,11 @@ function removeDuplicates(
 }
 
 
-
 /* =========================================================
    TOP 10
 ========================================================= */
 
-
-function getTop(
-    data
-) {
+function getTop(data) {
 
     const unique =
         removeDuplicates(
@@ -1282,17 +1155,8 @@ function getTop(
         function(a, b) {
 
             return (
-
-                Number(
-                    b.visits
-                )
-
-                -
-
-                Number(
-                    a.visits
-                )
-
+                Number(b.visits) -
+                Number(a.visits)
             );
 
         }
@@ -1308,11 +1172,311 @@ function getTop(
 }
 
 
+/* =========================================================
+   FORMAT ZA JSON
+========================================================= */
+
+function formatList(data) {
+
+    if (!Array.isArray(data)) {
+
+        return [];
+
+    }
+
+
+    return data.map(
+
+        function(item) {
+
+            return {
+
+                id:
+                    String(
+                        item.id
+                    ).trim(),
+
+                views:
+                    Number(
+                        item.visits || 0
+                    )
+
+            };
+
+        }
+
+    );
+
+}
+
+
+/* =========================================================
+   VALIDACIJA popular.json
+========================================================= */
+
+function validatePopularJSON(data) {
+
+    section(
+        "9. VALIDACIJA popular.json"
+    );
+
+
+    if (!data) {
+
+        throw new Error(
+            "popular.json je prazan."
+        );
+
+    }
+
+
+    /* -----------------------------------------
+       GLAVNI OBJEKAT
+    ----------------------------------------- */
+
+    if (
+        typeof data !== "object" ||
+        Array.isArray(data)
+    ) {
+
+        throw new Error(
+            "popular.json mora biti objekat."
+        );
+
+    }
+
+
+    const categories = [
+
+        "today",
+        "last30Days",
+        "allTime"
+
+    ];
+
+
+    /* -----------------------------------------
+       SVE 3 KATEGORIJE
+    ----------------------------------------- */
+
+    categories.forEach(
+
+        function(category) {
+
+            if (
+                !Array.isArray(
+                    data[category]
+                )
+            ) {
+
+                throw new Error(
+                    `${category} nije validan niz.`
+                );
+
+            }
+
+
+            if (
+                data[category].length >
+                TOP_LIMIT
+            ) {
+
+                throw new Error(
+                    `${category} ima vise od ${TOP_LIMIT} elemenata.`
+                );
+
+            }
+
+
+            data[category].forEach(
+
+                function(item, index) {
+
+                    if (
+                        !item ||
+                        typeof item !== "object"
+                    ) {
+
+                        throw new Error(
+                            `${category}[${index}] nije objekat.`
+                        );
+
+                    }
+
+
+                    if (
+                        typeof item.id !== "string" ||
+                        !item.id.trim()
+                    ) {
+
+                        throw new Error(
+                            `${category}[${index}] nema validan id.`
+                        );
+
+                    }
+
+
+                    if (
+                        typeof item.views !== "number" ||
+                        !Number.isFinite(
+                            item.views
+                        ) ||
+                        item.views < 0
+                    ) {
+
+                        throw new Error(
+                            `${category}[${index}] nema validan views.`
+                        );
+
+                    }
+
+                }
+
+            );
+
+        }
+
+    );
+
+
+    console.log(
+        "today:",
+        data.today.length
+    );
+
+
+    console.log(
+        "last30Days:",
+        data.last30Days.length
+    );
+
+
+    console.log(
+        "allTime:",
+        data.allTime.length
+    );
+
+
+    console.log(
+        "popular.json validan."
+    );
+
+
+    return true;
+
+}
+
+
+/* =========================================================
+   NAPRAVI popular.json
+========================================================= */
+
+function createPopularJSON(
+
+    popularOduvek,
+
+    popular30Dana,
+
+    popularDanas
+
+) {
+
+    section(
+        "8. PRAVLJENJE popular.json"
+    );
+
+
+    const output = {
+
+        today:
+            formatList(
+                popularDanas
+            ),
+
+        last30Days:
+            formatList(
+                popular30Dana
+            ),
+
+        allTime:
+            formatList(
+                popularOduvek
+            )
+
+    };
+
+
+    /* -----------------------------------------
+       VALIDIRAJ PRE UPISA
+    ----------------------------------------- */
+
+    validatePopularJSON(
+        output
+    );
+
+
+    /* -----------------------------------------
+       SACUVAJ
+    ----------------------------------------- */
+
+    fs.writeFileSync(
+
+        OUTPUT_FILE,
+
+        JSON.stringify(
+            output,
+            null,
+            4
+        ),
+
+        "utf8"
+
+    );
+
+
+    console.log("");
+
+    console.log(
+        "popular.json uspesno napravljen."
+    );
+
+
+    console.log(
+        "Lokacija:",
+        OUTPUT_FILE
+    );
+
+
+    /* -----------------------------------------
+       ISPIS
+    ----------------------------------------- */
+
+    printTop(
+        "TOP 10 - TODAY",
+        popularDanas
+    );
+
+
+    printTop(
+        "TOP 10 - LAST 30 DAYS",
+        popular30Dana
+    );
+
+
+    printTop(
+        "TOP 10 - ALL TIME",
+        popularOduvek
+    );
+
+
+    return output;
+
+}
+
 
 /* =========================================================
    PRINT TOP
 ========================================================= */
-
 
 function printTop(
 
@@ -1330,7 +1494,8 @@ function printTop(
 
 
     if (
-        !data.length
+        !Array.isArray(data) ||
+        data.length === 0
     ) {
 
         console.log(
@@ -1360,356 +1525,9 @@ function printTop(
 }
 
 
-
-/* =========================================================
-   FORMAT
-========================================================= */
-
-
-function formatList(
-    data
-) {
-
-    return data.map(
-
-        function(item) {
-
-            return {
-
-                id:
-                    item.id,
-
-                views:
-                    Number(
-                        item.visits ||
-                        0
-                    )
-
-            };
-
-        }
-
-    );
-
-}
-
-
-
-/* =========================================================
-   VALIDACIJA NOVOG FORMATA
-========================================================= */
-
-
-function validatePopularJSON(
-    data
-) {
-
-    section(
-        "9. VALIDACIJA popular.json"
-    );
-
-
-    if (!data) {
-
-        throw new Error(
-            "popular.json je prazan."
-        );
-
-    }
-
-
-    const categories = [
-
-        "today",
-        "last30Days",
-        "allTime"
-
-    ];
-
-
-    categories.forEach(
-
-        function(category) {
-
-            /*
-             * Kategorija mora postojati
-             */
-
-            if (
-                !data[category] ||
-                typeof data[category] !==
-                "object"
-            ) {
-
-                throw new Error(
-                    `${category} nije objekat.`
-                );
-
-            }
-
-
-            /*
-             * items mora postojati
-             */
-
-            if (
-                !Array.isArray(
-                    data[category].items
-                )
-            ) {
-
-                throw new Error(
-                    `${category}.items nije niz.`
-                );
-
-            }
-
-
-            const items =
-                data[category].items;
-
-
-            /*
-             * TOP LIMIT
-             */
-
-            if (
-                items.length >
-                TOP_LIMIT
-            ) {
-
-                throw new Error(
-                    `${category}.items ima vise od ${TOP_LIMIT} elemenata.`
-                );
-
-            }
-
-
-            /*
-             * Provera svakog elementa
-             */
-
-            items.forEach(
-
-                function(item) {
-
-                    if (
-                        !item ||
-                        !item.id
-                    ) {
-
-                        throw new Error(
-                            `${category} ima element bez id.`
-                        );
-
-                    }
-
-
-                    if (
-                        typeof item.views !==
-                        "number"
-                    ) {
-
-                        throw new Error(
-                            `${category} ${item.id} nema validan views.`
-                        );
-
-                    }
-
-
-                    if (
-                        !Number.isFinite(
-                            item.views
-                        )
-                    ) {
-
-                        throw new Error(
-                            `${category} ${item.id} ima nevalidan broj views.`
-                        );
-
-                    }
-
-
-                    if (
-                        item.views < 0
-                    ) {
-
-                        throw new Error(
-                            `${category} ${item.id} ima negativan views.`
-                        );
-
-                    }
-
-                }
-
-            );
-
-        }
-
-    );
-
-
-    console.log(
-        "✅ today:",
-        data.today.items.length
-    );
-
-
-    console.log(
-        "✅ last30Days:",
-        data.last30Days.items.length
-    );
-
-
-    console.log(
-        "✅ allTime:",
-        data.allTime.items.length
-    );
-
-
-    console.log(
-        "✅ popular.json validan."
-    );
-
-
-    return true;
-
-}
-
-
-
-/* =========================================================
-   NAPRAVI JSON
-========================================================= */
-
-
-function createPopularJSON(
-
-    popularOduvek,
-
-    popular30Dana,
-
-    popularDanas
-
-) {
-
-    section(
-        "8. PRAVLJENJE popular.json"
-    );
-
-
-    /*
-     * NOVI FORMAT
-     *
-     * Ovo je format koji tvoj
-     * GLAVNI SCRIPT ocekuje.
-     */
-
-    const output = {
-
-        today: {
-
-            items:
-                formatList(
-                    popularDanas
-                )
-
-        },
-
-
-        last30Days: {
-
-            items:
-                formatList(
-                    popular30Dana
-                )
-
-        },
-
-
-        allTime: {
-
-            items:
-                formatList(
-                    popularOduvek
-                )
-
-        }
-
-    };
-
-
-    /*
-     * Upis fajla
-     */
-
-    fs.writeFileSync(
-
-        OUTPUT_FILE,
-
-        JSON.stringify(
-            output,
-            null,
-            4
-        ),
-
-        "utf8"
-
-    );
-
-
-    console.log(
-        "✅ popular.json napravljen."
-    );
-
-
-    console.log(
-        "Lokacija:",
-        OUTPUT_FILE
-    );
-
-
-    /*
-     * Ispis rezultata
-     */
-
-    printTop(
-        "TOP 10 - TODAY",
-        popularDanas
-    );
-
-
-    printTop(
-        "TOP 10 - LAST 30 DAYS",
-        popular30Dana
-    );
-
-
-    printTop(
-        "TOP 10 - ALL TIME",
-        popularOduvek
-    );
-
-
-    /*
-     * Validacija
-     */
-
-    validatePopularJSON(
-        output
-    );
-
-
-    return output;
-
-}
-
-
-
 /* =========================================================
    GLAVNA FUNKCIJA
 ========================================================= */
-
 
 async function createPopularJSONProcess() {
 
@@ -1746,7 +1564,6 @@ async function createPopularJSONProcess() {
             getCredentials();
 
 
-
         /* =================================================
            2. AUTH
         ================================================= */
@@ -1755,7 +1572,6 @@ async function createPopularJSONProcess() {
             createGoogleAuth(
                 credentials
             );
-
 
 
         /* =================================================
@@ -1767,16 +1583,14 @@ async function createPopularJSONProcess() {
         );
 
 
-
         /* =================================================
-           4. CLIENT
+           4. GA4 CLIENT
         ================================================= */
 
         const analyticsDataClient =
             createAnalyticsClient(
                 credentials
             );
-
 
 
         /* =================================================
@@ -1788,7 +1602,6 @@ async function createPopularJSONProcess() {
         );
 
 
-
         /* =================================================
            6A. TODAY
         ================================================= */
@@ -1798,7 +1611,7 @@ async function createPopularJSONProcess() {
         );
 
 
-        let danas =
+        const danas =
             await getPeriodData(
 
                 analyticsDataClient,
@@ -1810,69 +1623,6 @@ async function createPopularJSONProcess() {
                 "today"
 
             );
-
-
-        /*
-         * Ako GA4 jos nije obradio danasnje podatke,
-         * probaj juce.
-         */
-
-        if (
-            danas.length === 0
-        ) {
-
-            console.log("");
-
-            console.log(
-                "⚠️ GA4 nema podatke za TODAY."
-            );
-
-
-            console.log(
-                "Pokusavam YESTERDAY..."
-            );
-
-
-            const juce =
-                await getPeriodData(
-
-                    analyticsDataClient,
-
-                    "Juce - fallback za TODAY",
-
-                    "yesterday",
-
-                    "yesterday"
-
-                );
-
-
-            if (
-                juce.length > 0
-            ) {
-
-                console.log("");
-
-                console.log(
-                    "✅ Pronadjeni podaci za juce."
-                );
-
-
-                danas =
-                    juce;
-
-            } else {
-
-                console.log("");
-
-                console.log(
-                    "⚠️ Nema ni podataka za juce."
-                );
-
-            }
-
-        }
-
 
 
         /* =================================================
@@ -1898,7 +1648,6 @@ async function createPopularJSONProcess() {
             );
 
 
-
         /* =================================================
            6C. ALL TIME
         ================================================= */
@@ -1922,9 +1671,8 @@ async function createPopularJSONProcess() {
             );
 
 
-
         /* =================================================
-           7. TOP
+           7. TOP LISTE
         ================================================= */
 
         section(
@@ -1968,9 +1716,8 @@ async function createPopularJSONProcess() {
         );
 
 
-
         /* =================================================
-           8. JSON
+           8. NAPRAVI JSON
         ================================================= */
 
         createPopularJSON(
@@ -1984,9 +1731,8 @@ async function createPopularJSONProcess() {
         );
 
 
-
         /* =================================================
-           SUCCESS
+           USPESNO
         ================================================= */
 
         section(
@@ -1995,77 +1741,74 @@ async function createPopularJSONProcess() {
 
 
         console.log(
-            "✅ Google Service Account"
+            "Google Service Account OK"
         );
 
 
         console.log(
-            "✅ Google Auth"
+            "Google Auth OK"
         );
 
 
         console.log(
-            "✅ OAuth token"
+            "OAuth token OK"
         );
 
 
         console.log(
-            "✅ GA4 Data API"
+            "GA4 Data API OK"
         );
 
 
         console.log(
-            "✅ GA4 Property"
+            "GA4 Property OK"
         );
 
 
         console.log(
-            "✅ Today"
+            "Today OK"
         );
 
 
         console.log(
-            "✅ Last 30 Days"
+            "Last 30 Days OK"
         );
 
 
         console.log(
-            "✅ All Time"
+            "All Time OK"
         );
 
 
         console.log(
-            "✅ Filtriranje"
+            "Filtriranje OK"
         );
 
 
         console.log(
-            "✅ Duplikati"
+            "Duplikati OK"
         );
 
 
         console.log(
-            "✅ TOP 10"
+            "TOP 10 OK"
         );
 
 
         console.log(
-            "✅ popular.json"
+            "popular.json OK"
         );
 
 
         console.log("");
 
-
         console.log(
             "=========================================="
         );
 
-
         console.log(
             "SVE JE USPESNO ZAVRSENO"
         );
-
 
         console.log(
             "=========================================="
@@ -2080,27 +1823,23 @@ async function createPopularJSONProcess() {
 
 
         console.error(
-            "❌ popular.js NIJE USPESNO ZAVRSEN."
+            "popular.js NIJE USPESNO ZAVRSEN."
         );
 
 
         console.error(
             "Code:",
-            error.code ||
-            "n/a"
+            error.code || "n/a"
         );
 
 
         console.error(
             "Message:",
-            error.message ||
-            "n/a"
+            error.message || "n/a"
         );
 
 
-        if (
-            error.details
-        ) {
+        if (error.details) {
 
             console.error(
                 "Details:",
@@ -2111,7 +1850,6 @@ async function createPopularJSONProcess() {
 
 
         console.error("");
-
 
         console.error(
             "=========================================="
@@ -2128,19 +1866,15 @@ async function createPopularJSONProcess() {
         );
 
 
-        process.exit(
-            1
-        );
+        process.exit(1);
 
     }
 
 }
 
 
-
 /* =========================================================
    START
 ========================================================= */
-
 
 createPopularJSONProcess();
