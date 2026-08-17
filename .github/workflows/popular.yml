@@ -1,14 +1,46 @@
 name: Sve na dlanu - Popularno
 
 on:
+
+  # ==========================================
+  # RUCNO POKRETANJE
+  # ==========================================
+
   workflow_dispatch:
 
+
+  # ==========================================
+  # AUTOMATSKO POKRETANJE
+  # ==========================================
+
   schedule:
+
     # 09:30 UTC = 11:30 Srbija tokom letnjeg vremena
     - cron: "30 9 * * *"
 
+
+# ==========================================
+# DOZVOLE
+# ==========================================
+
 permissions:
   contents: write
+
+
+# ==========================================
+# SPRECAVA DVA ISTOVREMENA POKRETANJA
+# ==========================================
+
+concurrency:
+
+  group: sve-na-dlanu-popular
+
+  cancel-in-progress: false
+
+
+# ==========================================
+# JOB
+# ==========================================
 
 jobs:
 
@@ -16,7 +48,9 @@ jobs:
 
     runs-on: ubuntu-latest
 
+
     steps:
+
 
       # ==========================================
       # PREUZMI REPOSITORY
@@ -25,6 +59,13 @@ jobs:
       - name: Preuzmi repository
 
         uses: actions/checkout@v4
+
+        with:
+
+          # Preuzmi celu Git istoriju
+          # potrebno za pull --rebase
+
+          fetch-depth: 0
 
 
       # ==========================================
@@ -36,7 +77,9 @@ jobs:
         uses: actions/setup-node@v4
 
         with:
+
           node-version: 24
+
           cache: npm
 
 
@@ -48,11 +91,23 @@ jobs:
 
         run: |
 
+          echo "=========================================="
+          echo "NODE.JS PROVERA"
+          echo "=========================================="
+
+          echo ""
+
           echo "Node verzija:"
           node --version
 
+          echo ""
+
           echo "NPM verzija:"
           npm --version
+
+          echo ""
+
+          echo "=========================================="
 
 
       # ==========================================
@@ -61,7 +116,19 @@ jobs:
 
       - name: Instaliraj pakete
 
-        run: npm ci
+        run: |
+
+          echo "=========================================="
+          echo "INSTALACIJA NPM PAKETA"
+          echo "=========================================="
+
+          npm ci
+
+          echo ""
+
+          echo "NPM paketi uspesno instalirani."
+
+          echo "=========================================="
 
 
       # ==========================================
@@ -71,36 +138,90 @@ jobs:
       - name: Proveri Google Secret
 
         env:
+
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
 
         run: |
 
+          echo "=========================================="
+          echo "PROVERA GOOGLE SERVICE ACCOUNT"
+          echo "=========================================="
+
+
+          # ----------------------------------------
+          # PROVERA DA SECRET POSTOJI
+          # ----------------------------------------
+
           if [ -z "$GOOGLE_SERVICE_ACCOUNT_JSON" ]; then
-            echo "GRESKA: GOOGLE_SERVICE_ACCOUNT_JSON SECRET NIJE POSTAVLJEN!"
+
+            echo ""
+            echo "❌ GRESKA:"
+            echo "GOOGLE_SERVICE_ACCOUNT_JSON SECRET NIJE POSTAVLJEN!"
+
             exit 1
+
           fi
 
-          echo "Google Secret postoji."
 
-          echo "$GOOGLE_SERVICE_ACCOUNT_JSON" > /tmp/google-service-account.json
+          echo ""
+          echo "✅ Google Secret postoji."
+
+
+          # ----------------------------------------
+          # PRIVREMENI JSON
+          # ----------------------------------------
+
+          echo "$GOOGLE_SERVICE_ACCOUNT_JSON" \
+            > /tmp/google-service-account.json
+
+
+          # ----------------------------------------
+          # PROVERA JSON-A
+          # ----------------------------------------
 
           node -e "
+
           const fs = require('fs');
 
           const data = JSON.parse(
-            fs.readFileSync('/tmp/google-service-account.json', 'utf8')
+            fs.readFileSync(
+              '/tmp/google-service-account.json',
+              'utf8'
+            )
           );
 
-          console.log('client_email postoji:', !!data.client_email);
-          console.log('private_key postoji:', !!data.private_key);
+          console.log(
+            'client_email postoji:',
+            !!data.client_email
+          );
 
-          if (!data.client_email || !data.private_key) {
-            console.error('GRESKA: Secret nema client_email ili private_key.');
+          console.log(
+            'private_key postoji:',
+            !!data.private_key
+          );
+
+          if (
+            !data.client_email ||
+            !data.private_key
+          ) {
+
+            console.error(
+              '❌ GRESKA: Secret nema client_email ili private_key.'
+            );
+
             process.exit(1);
+
           }
 
-          console.log('Google Service Account JSON je validan.');
+          console.log(
+            '✅ Google Service Account JSON je validan.'
+          );
+
           "
+
+
+          echo ""
+          echo "=========================================="
 
 
       # ==========================================
@@ -110,6 +231,7 @@ jobs:
       - name: Pokreni popular.js
 
         env:
+
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
 
         run: |
@@ -118,7 +240,15 @@ jobs:
           echo "POKRECEM popular.js"
           echo "=========================================="
 
+          echo ""
+
           node popular.js
+
+          echo ""
+
+          echo "=========================================="
+          echo "popular.js ZAVRSEN"
+          echo "=========================================="
 
 
       # ==========================================
@@ -133,16 +263,84 @@ jobs:
           echo "PROVERA popular.json"
           echo "=========================================="
 
+
+          # ----------------------------------------
+          # PROVERA DA FAJL POSTOJI
+          # ----------------------------------------
+
           if [ ! -f popular.json ]; then
-            echo "GRESKA: popular.json nije napravljen!"
+
+            echo ""
+            echo "❌ GRESKA:"
+            echo "popular.json nije napravljen!"
+
             exit 1
+
           fi
 
-          echo "popular.json postoji."
 
           echo ""
-          echo "Sadrzaj:"
-          cat popular.json
+          echo "✅ popular.json postoji."
+
+
+          # ----------------------------------------
+          # PROVERA DA JE VALIDAN JSON
+          # ----------------------------------------
+
+          echo ""
+
+          echo "Proveravam JSON format..."
+
+
+          node -e "
+
+          const fs = require('fs');
+
+          const data = JSON.parse(
+            fs.readFileSync(
+              'popular.json',
+              'utf8'
+            )
+          );
+
+          console.log(
+            '✅ popular.json je validan JSON.'
+          );
+
+          console.log('');
+
+          console.log(
+            'Popularno oduvek:',
+            data.popularnoOduvek?.items?.length || 0
+          );
+
+          console.log(
+            'Popularno 30 dana:',
+            data.popularno30Dana?.items?.length || 0
+          );
+
+          console.log(
+            'Popularno danas:',
+            data.popularnoDanas?.items?.length || 0
+          );
+
+          "
+
+
+          # ----------------------------------------
+          # PRIKAZ FAJLA
+          # ----------------------------------------
+
+          echo ""
+
+          echo "Velicina fajla:"
+
+          ls -lh popular.json
+
+
+          echo ""
+
+          echo "=========================================="
 
 
       # ==========================================
@@ -153,20 +351,85 @@ jobs:
 
         run: |
 
-          git config user.name "github-actions[bot]"
+          echo "=========================================="
+          echo "GIT COMMIT I PUSH"
+          echo "=========================================="
 
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # ----------------------------------------
+          # GIT IDENTITET
+          # ----------------------------------------
+
+          git config \
+            user.name \
+            "github-actions[bot]"
+
+
+          git config \
+            user.email \
+            "41898282+github-actions[bot]@users.noreply.github.com"
+
+
+          # ----------------------------------------
+          # DODAJ popular.json
+          # ----------------------------------------
 
           git add popular.json
 
+
+          # ----------------------------------------
+          # PROVERA PROMENA
+          # ----------------------------------------
+
           if git diff --cached --quiet; then
 
-            echo "Nema promena u popular.json."
+            echo ""
+            echo "ℹ️ Nema promena u popular.json."
+            echo "Nema potrebe za commit/push."
 
-          else
-
-            git commit -m "Update popular.json"
-
-            git push
+            exit 0
 
           fi
+
+
+          # ----------------------------------------
+          # COMMIT
+          # ----------------------------------------
+
+          echo ""
+          echo "Pravim commit..."
+
+
+          git commit \
+            -m "Update popular.json"
+
+
+          # ----------------------------------------
+          # PREUZMI NAJNOVIJI MAIN
+          # ----------------------------------------
+
+          echo ""
+          echo "Preuzimam najnovije promene sa GitHub-a..."
+
+
+          git pull \
+            --rebase \
+            origin main
+
+
+          # ----------------------------------------
+          # PUSH
+          # ----------------------------------------
+
+          echo ""
+          echo "Saljem promene na GitHub..."
+
+
+          git push \
+            origin main
+
+
+          echo ""
+          echo "=========================================="
+          echo "✅ popular.json USPESNO SACUVAN"
+          echo "=========================================="
