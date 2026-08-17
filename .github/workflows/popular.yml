@@ -4,8 +4,9 @@ on:
   workflow_dispatch:
 
   schedule:
-    # 09:30 UTC = 11:30 Srbija tokom letnjeg vremena
-    # 09:30 UTC = 10:30 Srbija tokom zimskog vremena
+    # 09:30 UTC
+    # 11:30 Srbija tokom letnjeg vremena
+    # 10:30 Srbija tokom zimskog vremena
     - cron: "30 9 * * *"
 
 permissions:
@@ -19,9 +20,9 @@ jobs:
 
     steps:
 
-      # ==========================================
-      # PREUZMI REPOSITORY
-      # ==========================================
+      # =====================================================
+      # 1. CHECKOUT
+      # =====================================================
 
       - name: Preuzmi repository
 
@@ -29,11 +30,12 @@ jobs:
 
         with:
           fetch-depth: 0
+          ref: main
 
 
-      # ==========================================
-      # NODE.JS
-      # ==========================================
+      # =====================================================
+      # 2. NODE.JS
+      # =====================================================
 
       - name: Podesi Node.js
 
@@ -44,9 +46,9 @@ jobs:
           cache: npm
 
 
-      # ==========================================
-      # PROVERA NODE
-      # ==========================================
+      # =====================================================
+      # 3. PROVERA NODE
+      # =====================================================
 
       - name: Proveri Node.js
 
@@ -56,18 +58,13 @@ jobs:
           echo "NODE.JS"
           echo "=========================================="
 
-          echo "Node verzija:"
           node --version
-
-          echo ""
-
-          echo "NPM verzija:"
           npm --version
 
 
-      # ==========================================
-      # INSTALACIJA PAKETA
-      # ==========================================
+      # =====================================================
+      # 4. INSTALACIJA
+      # =====================================================
 
       - name: Instaliraj pakete
 
@@ -80,9 +77,9 @@ jobs:
           npm ci
 
 
-      # ==========================================
-      # PROVERA GOOGLE SECRET
-      # ==========================================
+      # =====================================================
+      # 5. GOOGLE SECRET
+      # =====================================================
 
       - name: Proveri Google Secret
 
@@ -92,13 +89,12 @@ jobs:
         run: |
 
           echo "=========================================="
-          echo "PROVERA GOOGLE SERVICE ACCOUNT"
+          echo "GOOGLE SERVICE ACCOUNT"
           echo "=========================================="
 
           if [ -z "$GOOGLE_SERVICE_ACCOUNT_JSON" ]; then
 
-            echo "❌ GRESKA:"
-            echo "GOOGLE_SERVICE_ACCOUNT_JSON SECRET NIJE POSTAVLJEN!"
+            echo "❌ GOOGLE_SERVICE_ACCOUNT_JSON NE POSTOJI."
 
             exit 1
 
@@ -106,144 +102,154 @@ jobs:
 
           echo "✅ Google Secret postoji."
 
-          echo ""
 
-          echo "Proveravam JSON..."
+          echo "$GOOGLE_SERVICE_ACCOUNT_JSON" \
+            > /tmp/google-service-account.json
 
-          echo "$GOOGLE_SERVICE_ACCOUNT_JSON" > /tmp/google-service-account.json
 
-          node -e "
+          node - <<'NODE'
 
-          const fs = require('fs');
+          const fs = require("fs");
 
           let data;
 
           try {
 
-            data = JSON.parse(
-              fs.readFileSync(
-                '/tmp/google-service-account.json',
-                'utf8'
-              )
-            );
+              data = JSON.parse(
+                  fs.readFileSync(
+                      "/tmp/google-service-account.json",
+                      "utf8"
+                  )
+              );
 
           } catch (error) {
 
-            console.error(
-              '❌ Secret nije validan JSON.'
-            );
+              console.error(
+                  "❌ Google Service Account JSON nije validan."
+              );
 
-            console.error(
-              error.message
-            );
+              console.error(
+                  error.message
+              );
 
-            process.exit(1);
+              process.exit(1);
 
           }
 
-          console.log(
-            'JSON validan: DA'
-          );
 
           console.log(
-            'type postoji:',
-            !!data.type
+              "JSON validan: DA"
           );
 
-          console.log(
-            'project_id postoji:',
-            !!data.project_id
-          );
 
           console.log(
-            'client_email postoji:',
-            !!data.client_email
+              "type:",
+              !!data.type
           );
 
+
           console.log(
-            'private_key postoji:',
-            !!data.private_key
+              "project_id:",
+              !!data.project_id
           );
+
+
+          console.log(
+              "client_email:",
+              !!data.client_email
+          );
+
+
+          console.log(
+              "private_key:",
+              !!data.private_key
+          );
+
 
           if (!data.type) {
 
-            console.error(
-              '❌ Nedostaje type.'
-            );
+              console.error(
+                  "❌ Nedostaje type."
+              );
 
-            process.exit(1);
+              process.exit(1);
 
           }
+
 
           if (!data.project_id) {
 
-            console.error(
-              '❌ Nedostaje project_id.'
-            );
+              console.error(
+                  "❌ Nedostaje project_id."
+              );
 
-            process.exit(1);
+              process.exit(1);
 
           }
+
 
           if (!data.client_email) {
 
-            console.error(
-              '❌ Nedostaje client_email.'
-            );
+              console.error(
+                  "❌ Nedostaje client_email."
+              );
 
-            process.exit(1);
+              process.exit(1);
 
           }
+
 
           if (!data.private_key) {
 
-            console.error(
-              '❌ Nedostaje private_key.'
-            );
+              console.error(
+                  "❌ Nedostaje private_key."
+              );
 
-            process.exit(1);
+              process.exit(1);
 
           }
+
 
           if (
-            !data.private_key.includes(
-              'BEGIN PRIVATE KEY'
-            )
+              !data.private_key.includes(
+                  "BEGIN PRIVATE KEY"
+              )
           ) {
 
-            console.error(
-              '❌ Private key nema BEGIN PRIVATE KEY.'
-            );
+              console.error(
+                  "❌ Private key nema BEGIN PRIVATE KEY."
+              );
 
-            process.exit(1);
+              process.exit(1);
 
           }
+
 
           if (
-            !data.private_key.includes(
-              'END PRIVATE KEY'
-            )
+              !data.private_key.includes(
+                  "END PRIVATE KEY"
+              )
           ) {
 
-            console.error(
-              '❌ Private key nema END PRIVATE KEY.'
-            );
+              console.error(
+                  "❌ Private key nema END PRIVATE KEY."
+              );
 
-            process.exit(1);
+              process.exit(1);
 
           }
 
-          console.log('');
+
           console.log(
-            '✅ Google Service Account JSON je validan.'
+              "✅ Google Service Account JSON je potpuno validan."
           );
 
-          "
+          NODE
 
 
-      # ==========================================
-      # POKRENI GA4
-      # ==========================================
+      # =====================================================
+      # 6. POKRENI GA4
+      # =====================================================
 
       - name: Pokreni popular.js
 
@@ -259,9 +265,9 @@ jobs:
           node popular.js
 
 
-      # ==========================================
-      # PROVERI popular.json
-      # ==========================================
+      # =====================================================
+      # 7. PROVERI popular.json
+      # =====================================================
 
       - name: Proveri popular.json
 
@@ -271,184 +277,257 @@ jobs:
           echo "PROVERA popular.json"
           echo "=========================================="
 
+
           if [ ! -f popular.json ]; then
 
-            echo "❌ GRESKA:"
-            echo "popular.json nije napravljen!"
+            echo "❌ popular.json NE POSTOJI."
 
             exit 1
 
           fi
 
-          echo "✅ popular.json postoji."
 
-          echo ""
+          node - <<'NODE'
 
-          echo "Validacija JSON-a..."
-
-          node -e "
-
-          const fs = require('fs');
+          const fs = require("fs");
 
           let data;
 
           try {
 
-            data = JSON.parse(
-              fs.readFileSync(
-                'popular.json',
-                'utf8'
-              )
-            );
+              data = JSON.parse(
+                  fs.readFileSync(
+                      "popular.json",
+                      "utf8"
+                  )
+              );
 
           } catch (error) {
 
-            console.error(
-              '❌ popular.json nije validan JSON.'
-            );
+              console.error(
+                  "❌ popular.json nije validan JSON."
+              );
 
-            console.error(
-              error.message
-            );
+              console.error(
+                  error.message
+              );
 
-            process.exit(1);
-
-          }
-
-          if (!Array.isArray(data.today)) {
-
-            console.error(
-              '❌ today nije niz.'
-            );
-
-            process.exit(1);
+              process.exit(1);
 
           }
 
-          if (!Array.isArray(data.last30Days)) {
 
-            console.error(
-              '❌ last30Days nije niz.'
-            );
+          const lists = [
+              "today",
+              "last30Days",
+              "allTime"
+          ];
 
-            process.exit(1);
+
+          for (const list of lists) {
+
+              if (!Array.isArray(data[list])) {
+
+                  console.error(
+                      `❌ ${list} nije validan niz.`
+                  );
+
+                  process.exit(1);
+
+              }
+
+
+              if (data[list].length > 10) {
+
+                  console.error(
+                      `❌ ${list} ima vise od 10 elemenata.`
+                  );
+
+                  process.exit(1);
+
+              }
+
+
+              for (const item of data[list]) {
+
+                  if (!item.id) {
+
+                      console.error(
+                          `❌ ${list} ima element bez id.`
+                      );
+
+                      process.exit(1);
+
+                  }
+
+
+                  if (
+                      typeof item.views !== "number"
+                  ) {
+
+                      console.error(
+                          `❌ ${list}/${item.id} nema numericki views.`
+                      );
+
+                      process.exit(1);
+
+                  }
+
+              }
 
           }
 
-          if (!Array.isArray(data.allTime)) {
-
-            console.error(
-              '❌ allTime nije niz.'
-            );
-
-            process.exit(1);
-
-          }
 
           console.log(
-            '✅ today:',
-            data.today.length
+              "✅ today:",
+              data.today.length
           );
+
 
           console.log(
-            '✅ last30Days:',
-            data.last30Days.length
+              "✅ last30Days:",
+              data.last30Days.length
           );
+
 
           console.log(
-            '✅ allTime:',
-            data.allTime.length
+              "✅ allTime:",
+              data.allTime.length
           );
+
 
           console.log(
-            '✅ popular.json je validan.'
+              "✅ popular.json validan."
           );
 
-          "
+          NODE
+
 
           echo ""
-
-          echo "SADRZAJ popular.json:"
+          echo "SADRZAJ:"
           echo "=========================================="
 
           cat popular.json
 
           echo ""
-
           echo "=========================================="
 
 
-      # ==========================================
-      # SACUVAJ popular.json
-      # ==========================================
+      # =====================================================
+      # 8. SACUVAJ popular.json
+      # =====================================================
 
-      - name: Sacuvaj novi popular.json
+      - name: Sacuvaj popular.json
 
         run: |
 
           echo "=========================================="
-          echo "CUVANJE popular.json"
+          echo "SACUVAVANJE popular.json"
           echo "=========================================="
+
 
           git config user.name "github-actions[bot]"
 
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.email \
+            "41898282+github-actions[bot]@users.noreply.github.com"
 
 
-          # ======================================
+          # =================================================
+          # PROVERA TRENUTNOG BRANCH-A
+          # =================================================
+
+          echo "Trenutni branch:"
+
+          git branch --show-current
+
+
+          echo ""
+
+          echo "Trenutni commit:"
+
+          git rev-parse HEAD
+
+
+          # =================================================
           # DODAJ JSON
-          # ======================================
+          # =================================================
 
           git add popular.json
 
 
-          # ======================================
-          # PROVERI DA LI IMA PROMENA
-          # ======================================
+          # =================================================
+          # AKO NEMA PROMENA
+          # =================================================
 
           if git diff --cached --quiet; then
 
-            echo "ℹ️ Nema promena u popular.json."
+              echo ""
+              echo "ℹ️ Nema promena u popular.json."
 
-            exit 0
+              exit 0
 
           fi
 
 
-          # ======================================
-          # NAPRAVI COMMIT
-          # ======================================
+          # =================================================
+          # COMMIT
+          # =================================================
 
           git commit -m "Update popular.json"
 
 
-          # ======================================
-          # POVUCI EVENTUALNE PROMENE SA GITHUB-A
-          # ======================================
+          # =================================================
+          # SINHRONIZUJ SA REMOTE MAIN
+          # =================================================
 
           echo ""
           echo "=========================================="
-          echo "SINHRONIZACIJA SA GITHUB-OM"
+          echo "SINHRONIZACIJA SA REMOTE MAIN"
           echo "=========================================="
 
+
           git fetch origin main
+
+
+          # =================================================
+          # PROVERI DA LI JE REMOTE PROMENJEN
+          # =================================================
+
+          LOCAL_COMMIT=$(git rev-parse HEAD)
+
+          REMOTE_COMMIT=$(git rev-parse origin/main)
+
+
+          echo "Local:"
+          echo "$LOCAL_COMMIT"
+
+          echo ""
+
+          echo "Remote:"
+          echo "$REMOTE_COMMIT"
+
+
+          # =================================================
+          # REBASE
+          # =================================================
 
           git rebase origin/main
 
 
-          # ======================================
+          # =================================================
           # PUSH
-          # ======================================
+          # =================================================
 
           echo ""
           echo "=========================================="
-          echo "PUSH popular.json"
+          echo "PUSH"
           echo "=========================================="
+
 
           git push origin HEAD:main
 
 
           echo ""
           echo "=========================================="
-          echo "✅ popular.json JE USPESNO SACUVAN"
+          echo "✅ popular.json USPESNO POSLAT"
           echo "=========================================="
