@@ -1,5 +1,39 @@
 {
     "today": [],
-    "last30Days": [],
-    "allTime": []
+    "last30Days": [
+        {
+            "id": "ayse",
+            "views": 9
+        },
+        {
+            "id": "doktor-baska-hayatta-doktor-u-drugom-zivotu",
+            "views": 6
+        },
+        {
+            "id": "crne-beretke-siyah-bere",
+            "views": 1
+        },
+        {
+            "id": "sudbina-moje-cerke-goc-zamani",
+            "views": 1
+        }
+    ],
+    "allTime": [
+        {
+            "id": "ayse",
+            "views": 9
+        },
+        {
+            "id": "doktor-baska-hayatta-doktor-u-drugom-zivotu",
+            "views": 6
+        },
+        {
+            "id": "crne-beretke-siyah-bere",
+            "views": 1
+        },
+        {
+            "id": "sudbina-moje-cerke-goc-zamani",
+            "views": 1
+        }
+    ]
 }
