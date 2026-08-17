@@ -4,18 +4,41 @@
 
    PRAVI:
 
-   1. popularnoOduvek
+   1. allTime
       Najgledanije od pocetka GA4 merenja
 
-   2. popularno30Dana
+   2. last30Days
       Najgledanije poslednjih 30 dana
 
-   3. popularnoDanas
+   3. today
       Najgledanije danas
 
    SVE SE CUVA U:
 
    popular.json
+
+   FORMAT:
+
+   {
+       "today": [
+           {
+               "id": "ayse",
+               "views": 1520
+           }
+       ],
+       "last30Days": [
+           {
+               "id": "ayse",
+               "views": 24580
+           }
+       ],
+       "allTime": [
+           {
+               "id": "ayse",
+               "views": 135240
+           }
+       ]
+   }
 
    DETALJNA PROVERA:
 
@@ -1516,7 +1539,7 @@ function formatList(
                 id:
                     item.id,
 
-                visits:
+                views:
                     Number(
                         item.visits ||
                         0
@@ -1545,88 +1568,47 @@ function createPopularJSON(
     );
 
 
+    /* =====================================================
+       TACNA STRUKTURA popular.json
+    ===================================================== */
+
     const output = {
 
-        updatedAt:
-            new Date().toISOString(),
+        /* ================================================
+           DANAS
+        ================================================ */
 
-        updatedAtSerbia:
-            getSerbiaDateTime(),
-
-        timezone:
-            TIME_ZONE,
-
-        propertyId:
-            PROPERTY_ID,
+        today:
+            formatList(
+                popularDanas
+            ),
 
 
-        /* ==============================================
-           POPULARNO ODUVEK
-        ============================================== */
+        /* ================================================
+           POSLEDNJIH 30 DANA
+        ================================================ */
 
-        popularnoOduvek: {
-
-            title:
-                "Popularno oduvek",
-
-            count:
-                popularOduvek.length,
-
-            items:
-                formatList(
-                    popularOduvek
-                )
-
-        },
+        last30Days:
+            formatList(
+                popular30Dana
+            ),
 
 
-        /* ==============================================
-           POPULARNO 30 DANA
-        ============================================== */
+        /* ================================================
+           SVE VREME
+        ================================================ */
 
-        popularno30Dana: {
-
-            title:
-                "Najgledanije 30 dana",
-
-            period:
-                "30 dana",
-
-            count:
-                popular30Dana.length,
-
-            items:
-                formatList(
-                    popular30Dana
-                )
-
-        },
-
-
-        /* ==============================================
-           POPULARNO DANAS
-        ============================================== */
-
-        popularnoDanas: {
-
-            title:
-                "Najgledanije danas",
-
-            period:
-                "danas",
-
-            count:
-                popularDanas.length,
-
-            items:
-                formatList(
-                    popularDanas
-                )
-
-        }
+        allTime:
+            formatList(
+                popularOduvek
+            )
 
     };
 
+
+    /* =====================================================
+       UPIS U popular.json
+    ===================================================== */
 
     fs.writeFileSync(
 
@@ -1661,20 +1643,20 @@ function createPopularJSON(
 
 
     console.log(
-        "POPULARNO ODUVEK:",
-        popularOduvek.length
+        "DANAS:",
+        popularDanas.length
     );
 
 
     console.log(
-        "POPULARNO 30 DANA:",
+        "30 DANA:",
         popular30Dana.length
     );
 
 
     console.log(
-        "POPULARNO DANAS:",
-        popularDanas.length
+        "SVE VREME:",
+        popularOduvek.length
     );
 
 
@@ -1683,21 +1665,25 @@ function createPopularJSON(
     );
 
 
+    /* =====================================================
+       PRIKAZ
+    ===================================================== */
+
     printTop(
-        "TOP 10 - POPULARNO ODUVEK",
-        popularOduvek
+        "TOP 10 - DANAS",
+        popularDanas
     );
 
 
     printTop(
-        "TOP 10 - NAJGLEDANIJE 30 DANA",
+        "TOP 10 - POSLEDNJIH 30 DANA",
         popular30Dana
     );
 
 
     printTop(
-        "TOP 10 - NAJGLEDANIJE DANAS",
-        popularDanas
+        "TOP 10 - SVE VREME",
+        popularOduvek
     );
 
 
