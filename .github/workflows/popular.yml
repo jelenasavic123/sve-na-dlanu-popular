@@ -9,6 +9,18 @@ on:
     # 10:30 Srbija tokom zimskog vremena
     - cron: "30 9 * * *"
 
+# =========================================================
+# SAMO JEDAN WORKFLOW SME DA MENJA MAIN
+# =========================================================
+
+concurrency:
+  group: popular-json-update
+  cancel-in-progress: false
+
+# =========================================================
+# DOZVOLE
+# =========================================================
+
 permissions:
   contents: write
 
@@ -21,7 +33,7 @@ jobs:
     steps:
 
       # =====================================================
-      # 1. PREUZMI REPOSITORY
+      # 1. CHECKOUT
       # =====================================================
 
       - name: Preuzmi repository
@@ -30,6 +42,7 @@ jobs:
 
         with:
           fetch-depth: 0
+          persist-credentials: true
 
 
       # =====================================================
@@ -57,17 +70,17 @@ jobs:
           echo "NODE.JS"
           echo "=========================================="
 
-          echo "Node verzija:"
+          echo "Node:"
           node --version
 
           echo ""
 
-          echo "NPM verzija:"
+          echo "NPM:"
           npm --version
 
 
       # =====================================================
-      # 4. INSTALACIJA PAKETA
+      # 4. INSTALACIJA
       # =====================================================
 
       - name: Instaliraj pakete
@@ -93,46 +106,54 @@ jobs:
         run: |
 
           echo "=========================================="
-          echo "PROVERA GOOGLE SECRET"
+          echo "GOOGLE SERVICE ACCOUNT"
           echo "=========================================="
+
 
           if [ -z "$GOOGLE_SERVICE_ACCOUNT_JSON" ]; then
 
-            echo "❌ GRESKA:"
-            echo "GOOGLE_SERVICE_ACCOUNT_JSON SECRET NIJE POSTAVLJEN!"
+            echo "❌ GOOGLE_SERVICE_ACCOUNT_JSON NE POSTOJI."
 
             exit 1
 
           fi
 
+
           echo "✅ Google Secret postoji."
+
 
           echo ""
 
-          echo "Duzina Secret-a:"
-          echo "${#GOOGLE_SERVICE_ACCOUNT_JSON} karaktera"
 
-          echo "$GOOGLE_SERVICE_ACCOUNT_JSON" > /tmp/google-service-account.json
+          echo "$GOOGLE_SERVICE_ACCOUNT_JSON" \
+            > /tmp/google-service-account.json
 
 
-          node -e "
+          node <<'NODE'
 
-          const fs = require('fs');
+          const fs = require("fs");
 
-          const file = '/tmp/google-service-account.json';
+          const file =
+              "/tmp/google-service-account.json";
+
 
           let data;
 
+
           try {
 
-              data = JSON.parse(
-                  fs.readFileSync(file, 'utf8')
-              );
+              data =
+                  JSON.parse(
+                      fs.readFileSync(
+                          file,
+                          "utf8"
+                      )
+                  );
 
           } catch (error) {
 
               console.error(
-                  '❌ Secret nije validan JSON.'
+                  "❌ Secret nije validan JSON."
               );
 
               console.error(
@@ -145,30 +166,30 @@ jobs:
 
 
           console.log(
-              '✅ Google Service Account JSON je validan.'
+              "✅ JSON je validan."
           );
 
 
           console.log(
-              'type postoji:',
-              !!data.type
+              "type:",
+              data.type || "(nema)"
           );
 
 
           console.log(
-              'project_id postoji:',
-              !!data.project_id
+              "project_id:",
+              data.project_id || "(nema)"
           );
 
 
           console.log(
-              'client_email postoji:',
+              "client_email postoji:",
               !!data.client_email
           );
 
 
           console.log(
-              'private_key postoji:',
+              "private_key postoji:",
               !!data.private_key
           );
 
@@ -176,7 +197,7 @@ jobs:
           if (!data.type) {
 
               console.error(
-                  '❌ Nedostaje type.'
+                  "❌ Nedostaje type."
               );
 
               process.exit(1);
@@ -187,7 +208,7 @@ jobs:
           if (!data.project_id) {
 
               console.error(
-                  '❌ Nedostaje project_id.'
+                  "❌ Nedostaje project_id."
               );
 
               process.exit(1);
@@ -198,7 +219,7 @@ jobs:
           if (!data.client_email) {
 
               console.error(
-                  '❌ Nedostaje client_email.'
+                  "❌ Nedostaje client_email."
               );
 
               process.exit(1);
@@ -209,7 +230,7 @@ jobs:
           if (!data.private_key) {
 
               console.error(
-                  '❌ Nedostaje private_key.'
+                  "❌ Nedostaje private_key."
               );
 
               process.exit(1);
@@ -219,12 +240,12 @@ jobs:
 
           if (
               !data.private_key.includes(
-                  'BEGIN PRIVATE KEY'
+                  "BEGIN PRIVATE KEY"
               )
           ) {
 
               console.error(
-                  '❌ Private key nema BEGIN PRIVATE KEY.'
+                  "❌ Private key nema BEGIN PRIVATE KEY."
               );
 
               process.exit(1);
@@ -234,12 +255,12 @@ jobs:
 
           if (
               !data.private_key.includes(
-                  'END PRIVATE KEY'
+                  "END PRIVATE KEY"
               )
           ) {
 
               console.error(
-                  '❌ Private key nema END PRIVATE KEY.'
+                  "❌ Private key nema END PRIVATE KEY."
               );
 
               process.exit(1);
@@ -248,14 +269,14 @@ jobs:
 
 
           console.log(
-              '✅ Svi Google credentials podaci postoje.'
+              "✅ Google Service Account je validan."
           );
 
-          "
+          NODE
 
 
       # =====================================================
-      # 6. POKRENI GA4
+      # 6. POKRENI popular.js
       # =====================================================
 
       - name: Pokreni popular.js
@@ -273,7 +294,7 @@ jobs:
 
 
       # =====================================================
-      # 7. PROVERI popular.json
+      # 7. PROVERA popular.json
       # =====================================================
 
       - name: Proveri popular.json
@@ -287,8 +308,7 @@ jobs:
 
           if [ ! -f popular.json ]; then
 
-            echo "❌ GRESKA:"
-            echo "popular.json nije napravljen!"
+            echo "❌ popular.json NE POSTOJI."
 
             exit 1
 
@@ -296,14 +316,6 @@ jobs:
 
 
           echo "✅ popular.json postoji."
-
-
-          echo ""
-
-
-          echo "Velicina fajla:"
-
-          wc -c popular.json
 
 
           echo ""
@@ -318,61 +330,45 @@ jobs:
       # 8. VALIDACIJA JSON-A
       # =====================================================
 
-      - name: Validiraj JSON
+      - name: Validiraj popular.json
 
         run: |
 
           echo "=========================================="
-          echo "VALIDACIJA JSON-A"
+          echo "VALIDACIJA popular.json"
           echo "=========================================="
 
 
-          node -e "
+          node <<'NODE'
 
-          const fs = require('fs');
-
-          const data = JSON.parse(
-              fs.readFileSync(
-                  'popular.json',
-                  'utf8'
-              )
-          );
+          const fs = require("fs");
 
 
-          if (!Array.isArray(data.today)) {
-
-              throw new Error(
-                  'today nije niz.'
+          const data =
+              JSON.parse(
+                  fs.readFileSync(
+                      "popular.json",
+                      "utf8"
+                  )
               );
-
-          }
-
-
-          if (!Array.isArray(data.last30Days)) {
-
-              throw new Error(
-                  'last30Days nije niz.'
-              );
-
-          }
-
-
-          if (!Array.isArray(data.allTime)) {
-
-              throw new Error(
-                  'allTime nije niz.'
-              );
-
-          }
 
 
           const lists = [
 
-              ['today', data.today],
+              [
+                  "today",
+                  data.today
+              ],
 
-              ['last30Days', data.last30Days],
+              [
+                  "last30Days",
+                  data.last30Days
+              ],
 
-              ['allTime', data.allTime]
+              [
+                  "allTime",
+                  data.allTime
+              ]
 
           ];
 
@@ -382,11 +378,19 @@ jobs:
               of lists
           ) {
 
+              if (!Array.isArray(list)) {
+
+                  throw new Error(
+                      `${name} nije niz.`
+                  );
+
+              }
+
+
               if (list.length > 10) {
 
                   throw new Error(
-                      name +
-                      ' ima vise od 10 elemenata.'
+                      `${name} ima vise od 10 elemenata.`
                   );
 
               }
@@ -395,41 +399,33 @@ jobs:
               for (const item of list) {
 
                   if (
-                      !item.id ||
-                      typeof item.id !== 'string'
+                      typeof item.id !== "string" ||
+                      !item.id.trim()
                   ) {
 
                       throw new Error(
-                          name +
-                          ' ima nevalidan id.'
+                          `${name} ima nevalidan id.`
                       );
 
                   }
 
 
                   if (
-                      typeof item.views !== 'number'
+                      typeof item.views !== "number" ||
+                      !Number.isFinite(item.views)
                   ) {
 
                       throw new Error(
-                          name +
-                          ' / ' +
-                          item.id +
-                          ' nema numeric views.'
+                          `${name}/${item.id} ima nevalidan views.`
                       );
 
                   }
 
 
-                  if (
-                      item.views < 0
-                  ) {
+                  if (item.views < 0) {
 
                       throw new Error(
-                          name +
-                          ' / ' +
-                          item.id +
-                          ' ima negativan views.'
+                          `${name}/${item.id} ima negativan views.`
                       );
 
                   }
@@ -440,74 +436,92 @@ jobs:
 
 
           console.log(
-              '✅ JSON struktura je validna.'
+              "✅ JSON je validan."
           );
 
 
           console.log(
-              'Today:',
+              "Today:",
               data.today.length
           );
 
 
           console.log(
-              'Last 30 Days:',
+              "Last 30 Days:",
               data.last30Days.length
           );
 
 
           console.log(
-              'All Time:',
+              "All Time:",
               data.allTime.length
           );
 
-          "
+          NODE
 
 
       # =====================================================
-      # 9. SINHRONIZUJ REMOTE MAIN
+      # 9. GIT IDENTITET
       # =====================================================
 
-      - name: Sinhronizuj GitHub repository
+      - name: Podesi Git
 
         run: |
-
-          echo "=========================================="
-          echo "SINHRONIZACIJA SA GITHUB MAIN"
-          echo "=========================================="
-
 
           git config user.name "github-actions[bot]"
 
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
 
-          echo "Preuzimam najnoviji main..."
+      # =====================================================
+      # 10. FETCH NAJNOVIJEG MAIN
+      # =====================================================
+
+      - name: Osvezi main pre commita
+
+        run: |
+
+          echo "=========================================="
+          echo "OSVEZAVANJE MAIN"
+          echo "=========================================="
+
 
           git fetch origin main
 
 
-          echo "Pokusavam rebase..."
+          echo ""
+
+          echo "Remote main:"
+
+          git rev-parse origin/main
+
+
+          echo ""
+
+          echo "Local main:"
+
+          git rev-parse HEAD
+
+
+          echo ""
+
+          echo "Rebase na najnoviji origin/main..."
+
 
           git rebase origin/main
 
 
       # =====================================================
-      # 10. SACUVAJ popular.json
+      # 11. COMMIT
       # =====================================================
 
-      - name: Sacuvaj novi popular.json
+      - name: Commituj popular.json
 
         run: |
 
           echo "=========================================="
-          echo "SACUVAVANJE popular.json"
+          echo "COMMIT popular.json"
           echo "=========================================="
-
-
-          git config user.name "github-actions[bot]"
-
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
 
           git add popular.json
@@ -515,33 +529,124 @@ jobs:
 
           if git diff --cached --quiet; then
 
-            echo "ℹ️ Nema promena u popular.json."
+            echo "ℹ️ Nema promena."
 
-            echo "GitHub push nije potreban."
+            echo "popular.json je isti kao u repository-ju."
 
           else
 
-            echo "Promena pronadjena."
-
             git commit -m "Update popular.json"
 
-
-            echo ""
-
-            echo "Saljem na GitHub..."
-
-            git push origin HEAD:main
-
-
-            echo ""
-
-            echo "✅ popular.json je uspesno poslat na GitHub."
+            echo "✅ Commit napravljen."
 
           fi
 
 
       # =====================================================
-      # 11. KRAJ
+      # 12. PUSH SA AUTOMATSKIM REBASE-OM
+      # =====================================================
+
+      - name: Push popular.json
+
+        run: |
+
+          echo "=========================================="
+          echo "PUSH NA GITHUB"
+          echo "=========================================="
+
+
+          MAX_ATTEMPTS=5
+
+          ATTEMPT=1
+
+
+          while [ $ATTEMPT -le $MAX_ATTEMPTS ]
+
+          do
+
+            echo ""
+
+            echo "------------------------------------------"
+
+            echo "Pokusaj $ATTEMPT od $MAX_ATTEMPTS"
+
+            echo "------------------------------------------"
+
+
+            # -------------------------------------------------
+            # UVEK OSVEZI REMOTE PRE PUSH-A
+            # -------------------------------------------------
+
+            git fetch origin main
+
+
+            # -------------------------------------------------
+            # PROVERI DA LI POSTOJE NEPOVEZANI COMMITI
+            # -------------------------------------------------
+
+            if ! git merge-base --is-ancestor HEAD origin/main; then
+
+              echo "Remote main ima nove commit-e."
+
+              echo "Radim rebase..."
+
+
+              git rebase origin/main
+
+            fi
+
+
+            # -------------------------------------------------
+            # POKUSAJ PUSH
+            # -------------------------------------------------
+
+            if git push origin HEAD:main; then
+
+              echo ""
+
+              echo "=========================================="
+
+              echo "✅ PUSH USPESAN"
+
+              echo "=========================================="
+
+
+              exit 0
+
+            fi
+
+
+            echo ""
+
+            echo "⚠️ Push nije uspeo."
+
+            echo "Remote se verovatno promenio."
+
+            echo "Ponovicu..."
+
+
+            ATTEMPT=$((ATTEMPT + 1))
+
+
+            sleep 3
+
+          done
+
+
+          echo ""
+
+          echo "=========================================="
+
+          echo "❌ PUSH NIJE USPEO"
+
+          echo "=========================================="
+
+
+          exit 1
+
+
+      # =====================================================
+      # 13. KRAJ
       # =====================================================
 
       - name: Zavrseno
@@ -549,18 +654,46 @@ jobs:
         run: |
 
           echo ""
-          echo "=========================================="
-          echo "SVE NA DLANU - POPULARNO"
+
           echo "=========================================="
 
-          echo "✅ GA4 podaci ucitani"
-          echo "✅ popular.json napravljen"
-          echo "✅ JSON validiran"
-          echo "✅ GitHub repository sinhronizovan"
-          echo "✅ popular.json sacuvan"
+          echo "SVE NA DLANU - POPULARNO"
+
+          echo "=========================================="
+
+
+          echo "✅ Google credentials"
+
+          echo "✅ Google OAuth"
+
+          echo "✅ GA4 Data API"
+
+          echo "✅ GA4 Property"
+
+          echo "✅ Today"
+
+          echo "✅ Last 30 Days"
+
+          echo "✅ All Time"
+
+          echo "✅ TOP 10"
+
+          echo "✅ popular.json"
+
+          echo "✅ JSON validacija"
+
+          echo "✅ GitHub commit"
+
+          echo "✅ GitHub push"
+
 
           echo ""
-          echo "Sledece automatsko pokretanje:"
-          echo "svakog dana u 09:30 UTC"
+
+          echo "Automatsko pokretanje:"
+
+          echo "svaki dan u 09:30 UTC"
+
+
+          echo ""
 
           echo "=========================================="
