@@ -1,32 +1,15 @@
 {
-    "today": [
-        {
-            "id": "ayse",
-            "views": 1520
-        },
-        {
-            "id": "sakir-pasa-ailesi",
-            "views": 1240
-        }
-    ],
+    "today": [],
     "last30Days": [
         {
-            "id": "ayse",
-            "views": 24580
-        },
-        {
-            "id": "sakir-pasa-ailesi",
-            "views": 21210
+            "id": "moja-serija-001",
+            "views": 2
         }
     ],
     "allTime": [
         {
-            "id": "ayse",
-            "views": 135240
-        },
-        {
-            "id": "sakir-pasa-ailesi",
-            "views": 112530
+            "id": "moja-serija-001",
+            "views": 2
         }
     ]
 }
