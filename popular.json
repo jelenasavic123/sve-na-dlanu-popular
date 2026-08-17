@@ -1,33 +1,32 @@
 {
-    "updatedAt": "2026-08-17T10:02:31.406Z",
-    "updatedAtSerbia": "17.08.2026. 12:02:31",
-    "timezone": "Europe/Belgrade",
-    "propertyId": "549759235",
-    "popularnoOduvek": {
-        "title": "Popularno oduvek",
-        "count": 1,
-        "items": [
-            {
-                "id": "moja-serija-001",
-                "visits": 2
-            }
-        ]
-    },
-    "popularno30Dana": {
-        "title": "Najgledanije 30 dana",
-        "period": "30 dana",
-        "count": 1,
-        "items": [
-            {
-                "id": "moja-serija-001",
-                "visits": 2
-            }
-        ]
-    },
-    "popularnoDanas": {
-        "title": "Najgledanije danas",
-        "period": "danas",
-        "count": 0,
-        "items": []
-    }
+    "today": [
+        {
+            "id": "ayse",
+            "views": 1520
+        },
+        {
+            "id": "sakir-pasa-ailesi",
+            "views": 1240
+        }
+    ],
+    "last30Days": [
+        {
+            "id": "ayse",
+            "views": 24580
+        },
+        {
+            "id": "sakir-pasa-ailesi",
+            "views": 21210
+        }
+    ],
+    "allTime": [
+        {
+            "id": "ayse",
+            "views": 135240
+        },
+        {
+            "id": "sakir-pasa-ailesi",
+            "views": 112530
+        }
+    ]
 }
