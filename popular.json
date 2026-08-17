@@ -1,15 +1,5 @@
 {
     "today": [],
-    "last30Days": [
-        {
-            "id": "moja-serija-001",
-            "views": 2
-        }
-    ],
-    "allTime": [
-        {
-            "id": "moja-serija-001",
-            "views": 2
-        }
-    ]
+    "last30Days": [],
+    "allTime": []
 }
