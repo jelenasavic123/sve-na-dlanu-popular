@@ -4,7 +4,21 @@
 
    AUTOMATSKO PRAVLJENJE popular.json
 
-   IZLAZ:
+   VAŽNO:
+   ---------------------------------------------------------
+   posts.json je GLAVNI SPISAK SERIJA.
+
+   popular.js:
+   - učitava ID-jeve iz posts.json
+   - čita GA4 podatke
+   - pronalazi ID serije u GA4 putanji
+   - IGNORIŠE epizode
+   - IGNORIŠE player stranice
+   - IGNORIŠE server stranice
+   - IGNORIŠE sve što nije u posts.json
+   - sabira preglede po seriji
+
+   FORMAT:
 
    {
        "today": [
@@ -51,14 +65,26 @@ const PROPERTY_ID = "549759235";
 
 const TOP_LIMIT = 10;
 
+const TIME_ZONE = "Europe/Belgrade";
+
+const ALL_TIME_START_DATE = "2020-01-01";
+
+
+/*
+ * popular.js i posts.json treba da budu
+ * u istom folderu.
+ */
+
+const POSTS_FILE = path.join(
+    __dirname,
+    "posts.json"
+);
+
+
 const OUTPUT_FILE = path.join(
     __dirname,
     "popular.json"
 );
-
-const TIME_ZONE = "Europe/Belgrade";
-
-const ALL_TIME_START_DATE = "2020-01-01";
 
 
 /* =========================================================
@@ -129,14 +155,180 @@ function maskEmail(email) {
 
 
 /* =========================================================
+   NORMALIZACIJA ID-a
+========================================================= */
+
+function normalizeId(value) {
+
+    if (value === null || value === undefined) {
+
+        return "";
+
+    }
+
+    return String(value)
+        .trim()
+        .toLowerCase();
+
+}
+
+
+/* =========================================================
+   UCITAJ posts.json
+========================================================= */
+
+function loadPosts() {
+
+    section(
+        "1. UCITAVANJE posts.json"
+    );
+
+
+    if (!fs.existsSync(POSTS_FILE)) {
+
+        throw new Error(
+            "Ne postoji posts.json: " +
+            POSTS_FILE
+        );
+
+    }
+
+
+    let data;
+
+
+    try {
+
+        const content =
+            fs.readFileSync(
+                POSTS_FILE,
+                "utf8"
+            );
+
+
+        data =
+            JSON.parse(
+                content
+            );
+
+
+    } catch (error) {
+
+        throw new Error(
+            "posts.json nije validan JSON: " +
+            error.message
+        );
+
+    }
+
+
+    if (!Array.isArray(data)) {
+
+        throw new Error(
+            "posts.json mora biti niz [...]."
+        );
+
+    }
+
+
+    console.log(
+        "Pronadjeno stavki u posts.json:",
+        data.length
+    );
+
+
+    /*
+     * Set svih dozvoljenih ID-jeva.
+     *
+     * OVO JE NAJVAZNIJE.
+     *
+     * Ako ID ne postoji ovde,
+     * NE MOZE uci u popular.json.
+     */
+
+    const validIds =
+        new Set();
+
+
+    const seriesById =
+        new Map();
+
+
+    data.forEach(
+        function(item) {
+
+            if (
+                !item ||
+                typeof item !== "object"
+            ) {
+
+                return;
+
+            }
+
+
+            const id =
+                normalizeId(
+                    item.id
+                );
+
+
+            if (!id) {
+
+                return;
+
+            }
+
+
+            validIds.add(id);
+
+            seriesById.set(
+                id,
+                item
+            );
+
+        }
+    );
+
+
+    console.log(
+        "Validnih ID-jeva serija:",
+        validIds.size
+    );
+
+
+    if (validIds.size === 0) {
+
+        throw new Error(
+            "posts.json nema nijedan validan ID serije."
+        );
+
+    }
+
+
+    return {
+
+        validIds:
+            validIds,
+
+        seriesById:
+            seriesById
+
+    };
+
+}
+
+
+/* =========================================================
    CREDENTIALS
 ========================================================= */
 
 function getCredentials() {
 
     section(
-        "1. GOOGLE SERVICE ACCOUNT"
+        "2. GOOGLE SERVICE ACCOUNT"
     );
+
 
     const json =
         process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
@@ -265,7 +457,7 @@ function getCredentials() {
 function createGoogleAuth(credentials) {
 
     section(
-        "2. GOOGLE AUTH"
+        "3. GOOGLE AUTH"
     );
 
 
@@ -320,7 +512,7 @@ function createGoogleAuth(credentials) {
 async function testGoogleAuthentication(auth) {
 
     section(
-        "3. GOOGLE OAUTH TOKEN"
+        "4. GOOGLE OAUTH TOKEN"
     );
 
 
@@ -385,7 +577,7 @@ async function testGoogleAuthentication(auth) {
 function createAnalyticsClient(credentials) {
 
     section(
-        "4. GA4 DATA API CLIENT"
+        "5. GA4 DATA API CLIENT"
     );
 
 
@@ -434,7 +626,7 @@ function createAnalyticsClient(credentials) {
 
 
 /* =========================================================
-   PROVERA PROPERTY
+   TEST GA4 PROPERTY
 ========================================================= */
 
 async function testGA4Property(
@@ -442,7 +634,7 @@ async function testGA4Property(
 ) {
 
     section(
-        "5. PROVERA GA4 PROPERTY"
+        "6. PROVERA GA4 PROPERTY"
     );
 
 
@@ -535,10 +727,10 @@ async function testGA4Property(
 
 
 /* =========================================================
-   PAGE PATH -> ID
+   PAGE PATH NORMALIZACIJA
 ========================================================= */
 
-function convertPageToId(pagePath) {
+function cleanPagePath(pagePath) {
 
     if (!pagePath) {
 
@@ -548,14 +740,14 @@ function convertPageToId(pagePath) {
 
 
     let value =
-        String(
-            pagePath
-        ).trim();
+        String(pagePath)
+        .trim();
 
 
-    /* -----------------------------------------
-       AKO JE CEO URL
-    ----------------------------------------- */
+    /*
+     * Ako GA4 nekada vrati puni URL,
+     * izvuci samo pathname.
+     */
 
     try {
 
@@ -567,60 +759,52 @@ function convertPageToId(pagePath) {
             const url =
                 new URL(value);
 
-
             value =
-                url.pathname +
-                url.search;
+                url.pathname;
 
         }
 
     } catch (error) {
 
-        // Nije URL
+        // Nastavljamo dalje.
     }
 
 
-    /* -----------------------------------------
-       QUERY
-    ----------------------------------------- */
+    /*
+     * Dekodiranje URL-a.
+     */
+
+    try {
+
+        value =
+            decodeURIComponent(
+                value
+            );
+
+    } catch (error) {
+
+        // Ako ne moze da se dekodira,
+        // koristimo original.
+    }
+
+
+    /*
+     * Mala slova.
+     */
+
+    value =
+        value.toLowerCase();
+
+
+    /*
+     * Ukloni query string.
+     */
 
     const questionIndex =
         value.indexOf("?");
 
 
     if (questionIndex !== -1) {
-
-        const query =
-            value.substring(
-                questionIndex + 1
-            );
-
-
-        try {
-
-            const params =
-                new URLSearchParams(
-                    query
-                );
-
-
-            const id =
-                params.get("id");
-
-
-            if (id) {
-
-                return String(
-                    id
-                ).trim();
-
-            }
-
-        } catch (error) {
-
-            // Nastavljamo dalje
-        }
-
 
         value =
             value.substring(
@@ -631,9 +815,9 @@ function convertPageToId(pagePath) {
     }
 
 
-    /* -----------------------------------------
-       HASH
-    ----------------------------------------- */
+    /*
+     * Ukloni hash.
+     */
 
     const hashIndex =
         value.indexOf("#");
@@ -650,9 +834,9 @@ function convertPageToId(pagePath) {
     }
 
 
-    /* -----------------------------------------
-       UKLONI /
-    ----------------------------------------- */
+    /*
+     * Ukloni pocetni /.
+     */
 
     value =
         value.replace(
@@ -661,69 +845,29 @@ function convertPageToId(pagePath) {
         );
 
 
-    /* -----------------------------------------
-       INDEX.HTML
-    ----------------------------------------- */
+    /*
+     * Ukloni zavrsni /.
+     */
 
     value =
         value.replace(
-            /\/index\.html$/i,
+            /\/+$/,
             ""
         );
 
 
-    /* -----------------------------------------
-       .HTML
-    ----------------------------------------- */
-
-    value =
-        value.replace(
-            /\.html$/i,
-            ""
-        );
-
-
-    /* -----------------------------------------
-       DEL0VI PUTANJE
-    ----------------------------------------- */
-
-    const parts =
-        value
-            .split("/")
-            .filter(Boolean);
-
-
-    if (!parts.length) {
-
-        return "";
-
-    }
-
-
-    /* -----------------------------------------
-       UZMI POSLEDNJI DEO
-    ----------------------------------------- */
-
-    value =
-        parts[
-            parts.length - 1
-        ];
-
-
-    return String(
-        value
-    ).trim();
+    return value;
 
 }
 
 
 /* =========================================================
-   VALIDAN ID SERIJE
+   PROVERA DA LI JE SEGMENT EPIZODA
 ========================================================= */
 
-function isValidSeriesId(id) {
+function isEpisodeSegment(segment) {
 
-    if (!id) {
+    if (!segment) {
 
         return false;
 
@@ -731,98 +875,309 @@ function isValidSeriesId(id) {
 
 
     const value =
-        String(
-            id
-        )
-        .trim()
-        .toLowerCase();
+        normalizeId(
+            segment
+        );
 
 
-    if (!value) {
+    /*
+     * Direktne reci za epizodu.
+     */
 
-        return false;
+    const forbiddenWords = [
 
-    }
+        "episode",
+        "episodes",
+        "epizoda",
+        "epizode",
 
+        "player",
+        "watch",
+        "video",
 
-    /* -----------------------------------------
-       STRANICE KOJE NE ZELIMO
-    ----------------------------------------- */
+        "server1",
+        "server2",
+        "server3",
 
-    const forbidden = [
+        "server-1",
+        "server-2",
+        "server-3",
 
-        "index",
-        "index.html",
-        "series",
-        "home",
-        "search",
-        "popular",
-        "about",
-        "login",
-        "404",
-        "404.html"
+        "vidply",
+        "filemoon",
+        "doodstream",
+        "streamwish",
+        "streamtape",
+        "abyss",
+        "voe",
+        "uqload",
+        "shorticu",
+        "afguti",
+        "okru",
+        "vkvideo"
 
     ];
 
 
     if (
-        forbidden.includes(
+        forbiddenWords.includes(
             value
         )
     ) {
 
-        return false;
+        return true;
 
     }
 
 
-    /* -----------------------------------------
-       FAJLOVI KOJE NE ZELIMO
-    ----------------------------------------- */
+    /*
+     * episode-1
+     * episode-01
+     * ep-1
+     * ep01
+     */
 
-    const forbiddenExtensions = [
-
-        ".css",
-        ".js",
-        ".png",
-        ".jpg",
-        ".jpeg",
-        ".webp",
-        ".gif",
-        ".svg",
-        ".ico",
-        ".json",
-        ".xml",
-        ".txt",
-        ".woff",
-        ".woff2",
-        ".ttf",
-        ".mp4",
-        ".m3u8",
-        ".map"
-
-    ];
-
-
-    for (
-        const extension
-        of forbiddenExtensions
+    if (
+        /^episode[-_ ]?\d+$/i.test(
+            value
+        )
     ) {
 
+        return true;
+
+    }
+
+
+    if (
+        /^ep[-_ ]?\d+$/i.test(
+            value
+        )
+    ) {
+
+        return true;
+
+    }
+
+
+    if (
+        /^epizoda[-_ ]?\d+$/i.test(
+            value
+        )
+    ) {
+
+        return true;
+
+    }
+
+
+    /*
+     * Samo broj:
+     *
+     * /ayse/1
+     * /ayse/01
+     *
+     * tretiramo kao epizodu.
+     */
+
+    if (
+        /^\d+$/.test(
+            value
+        )
+    ) {
+
+        return true;
+
+    }
+
+
+    return false;
+
+}
+
+
+/* =========================================================
+   PRONALAZAK SERIJE U PAGE PATH
+========================================================= */
+
+/*
+ * OVO JE GLAVNA FUNKCIJA.
+ *
+ * Primer:
+ *
+ * GA4:
+ *
+ * /1001-noc-binbir-gece
+ *
+ * rezultat:
+ *
+ * 1001-noc-binbir-gece
+ *
+ *
+ * GA4:
+ *
+ * /1001-noc-binbir-gece/epizoda-01
+ *
+ * rezultat:
+ *
+ * 1001-noc-binbir-gece
+ *
+ *
+ * Ali samo ako:
+ *
+ * 1001-noc-binbir-gece
+ *
+ * postoji u posts.json.
+ */
+
+function findSeriesIdFromPagePath(
+    pagePath,
+    validIds
+) {
+
+    const cleaned =
+        cleanPagePath(
+            pagePath
+        );
+
+
+    if (!cleaned) {
+
+        return "";
+
+    }
+
+
+    const segments =
+        cleaned
+            .split("/")
+            .filter(Boolean);
+
+
+    if (!segments.length) {
+
+        return "";
+
+    }
+
+
+    /*
+     * -----------------------------------------------------
+     * NAJVAZNIJE:
+     *
+     * prvo proveravamo svaki segment
+     * da li je TAČNO ID iz posts.json.
+     * -----------------------------------------------------
+     */
+
+    for (
+        const segment
+        of segments
+    ) {
+
+        const normalized =
+            normalizeId(
+                segment
+            );
+
+
+        /*
+         * Ako je direktno ID serije,
+         * odmah ga prihvatamo.
+         */
+
         if (
-            value.endsWith(
-                extension
+            validIds.has(
+                normalized
             )
         ) {
 
-            return false;
+            return normalized;
 
         }
 
     }
 
 
-    return true;
+    /*
+     * -----------------------------------------------------
+     * Ako nema direktnog podudaranja,
+     * proveravamo kombinacije segmenata.
+     *
+     * Ovo pomaže ako je URL:
+     *
+     * /series/ayse
+     *
+     * /serije/ayse
+     * -----------------------------------------------------
+     */
+
+    for (
+        let start = 0;
+        start < segments.length;
+        start++
+    ) {
+
+        let combined = "";
+
+
+        for (
+            let end = start;
+            end < segments.length;
+            end++
+        ) {
+
+            const segment =
+                segments[end];
+
+
+            /*
+             * Ne spajamo epizode.
+             */
+
+            if (
+                isEpisodeSegment(
+                    segment
+                )
+            ) {
+
+                break;
+
+            }
+
+
+            if (combined) {
+
+                combined += "/";
+
+            }
+
+
+            combined +=
+                normalizeId(
+                    segment
+                );
+
+
+            /*
+             * Ako ceo deo odgovara ID-u.
+             */
+
+            if (
+                validIds.has(
+                    combined
+                )
+            ) {
+
+                return combined;
+
+            }
+
+        }
+
+    }
+
+
+    return "";
 
 }
 
@@ -839,7 +1194,9 @@ async function getPeriodData(
 
     startDate,
 
-    endDate
+    endDate,
+
+    validIds
 
 ) {
 
@@ -856,7 +1213,7 @@ async function getPeriodData(
     console.log(
         "Period:",
         startDate,
-        "->",
+        "→",
         endDate
     );
 
@@ -907,26 +1264,8 @@ async function getPeriodData(
 
                 ],
 
-                orderBys: [
-
-                    {
-
-                        metric: {
-
-                            metricName:
-                                "screenPageViews",
-
-                            order:
-                                "DESCENDING"
-
-                        }
-
-                    }
-
-                ],
-
                 limit:
-                    10000
+                    100000
 
             });
 
@@ -941,7 +1280,19 @@ async function getPeriodData(
         );
 
 
-        const result = [];
+        /*
+         * -------------------------------------------------
+         * OVDE SABIRAMO SVE PREGLEDE PO SERIJI.
+         * -------------------------------------------------
+         */
+
+        const totals =
+            new Map();
+
+
+        let matchedRows = 0;
+
+        let ignoredRows = 0;
 
 
         rows.forEach(
@@ -964,24 +1315,76 @@ async function getPeriodData(
                     );
 
 
-                const id =
-                    convertPageToId(
-                        pagePath
-                    );
-
-
-                /* -----------------------------------------
-                   SAMO VALIDNE SERIJE
-                ----------------------------------------- */
-
                 if (
-                    !isValidSeriesId(id)
+                    views <= 0
                 ) {
+
+                    ignoredRows++;
 
                     return;
 
                 }
 
+
+                /*
+                 * Pronadji seriju.
+                 */
+
+                const seriesId =
+                    findSeriesIdFromPagePath(
+
+                        pagePath,
+
+                        validIds
+
+                    );
+
+
+                /*
+                 * Nije serija iz posts.json.
+                 */
+
+                if (!seriesId) {
+
+                    ignoredRows++;
+
+                    return;
+
+                }
+
+
+                matchedRows++;
+
+
+                const old =
+                    totals.get(
+                        seriesId
+                    ) || 0;
+
+
+                totals.set(
+
+                    seriesId,
+
+                    old + views
+
+                );
+
+            }
+
+        );
+
+
+        /*
+         * Pretvori Map u niz.
+         */
+
+        const result = [];
+
+
+        totals.forEach(
+
+            function(views, id) {
 
                 if (
                     views <= 0
@@ -997,8 +1400,10 @@ async function getPeriodData(
                     id:
                         id,
 
-                    visits:
-                        views
+                    views:
+                        Number(
+                            views
+                        )
 
                 });
 
@@ -1007,13 +1412,50 @@ async function getPeriodData(
         );
 
 
+        /*
+         * Sortiraj od najgledanijeg.
+         */
+
+        result.sort(
+
+            function(a, b) {
+
+                return (
+                    b.views -
+                    a.views
+                );
+
+            }
+
+        );
+
+
         console.log(
-            "Validnih serija:",
+            "Redova koji odgovaraju serijama:",
+            matchedRows
+        );
+
+
+        console.log(
+            "Ignorisanih GA4 redova:",
+            ignoredRows
+        );
+
+
+        console.log(
+            "Pronadjeno razlicitih serija:",
             result.length
         );
 
 
-        return result;
+        /*
+         * Vrati samo TOP_LIMIT.
+         */
+
+        return result.slice(
+            0,
+            TOP_LIMIT
+        );
 
 
     } catch (error) {
@@ -1044,180 +1486,61 @@ async function getPeriodData(
 
 
 /* =========================================================
-   UKLANJANJE DUPLIKATA
+   PRINT TOP
 ========================================================= */
 
-function removeDuplicates(data) {
+function printTop(
 
-    const map =
-        new Map();
+    title,
+
+    data
+
+) {
+
+    console.log("");
+
+    console.log(
+        title
+    );
 
 
-    if (!Array.isArray(data)) {
+    if (!data.length) {
 
-        return [];
+        console.log(
+            "Nema podataka."
+        );
+
+
+        return;
 
     }
 
 
     data.forEach(
 
-        function(item) {
+        function(item, index) {
 
-            if (!item) {
+            console.log(
 
-                return;
+                `${index + 1}. ${item.id} - ${item.views} pregleda`
 
-            }
-
-
-            const id =
-                String(
-                    item.id || ""
-                ).trim();
-
-
-            if (!isValidSeriesId(id)) {
-
-                return;
-
-            }
-
-
-            const views =
-                Number(
-                    item.visits || 0
-                );
-
-
-            if (
-                !Number.isFinite(views) ||
-                views <= 0
-            ) {
-
-                return;
-
-            }
-
-
-            if (
-                map.has(id)
-            ) {
-
-                map.get(id).visits += views;
-
-            } else {
-
-                map.set(
-
-                    id,
-
-                    {
-
-                        id:
-                            id,
-
-                        visits:
-                            views
-
-                    }
-
-                );
-
-            }
-
-        }
-
-    );
-
-
-    return Array.from(
-        map.values()
-    );
-
-}
-
-
-/* =========================================================
-   TOP 10
-========================================================= */
-
-function getTop(data) {
-
-    const unique =
-        removeDuplicates(
-            data
-        );
-
-
-    unique.sort(
-
-        function(a, b) {
-
-            return (
-                Number(b.visits) -
-                Number(a.visits)
             );
 
         }
 
     );
 
-
-    return unique.slice(
-        0,
-        TOP_LIMIT
-    );
-
 }
 
 
 /* =========================================================
-   FORMAT ZA JSON
-========================================================= */
-
-function formatList(data) {
-
-    if (!Array.isArray(data)) {
-
-        return [];
-
-    }
-
-
-    return data.map(
-
-        function(item) {
-
-            return {
-
-                id:
-                    String(
-                        item.id
-                    ).trim(),
-
-                views:
-                    Number(
-                        item.visits || 0
-                    )
-
-            };
-
-        }
-
-    );
-
-}
-
-
-/* =========================================================
-   VALIDACIJA popular.json
+   VALIDACIJA
 ========================================================= */
 
 function validatePopularJSON(data) {
 
     section(
-        "9. VALIDACIJA popular.json"
+        "10. VALIDACIJA popular.json"
     );
 
 
@@ -1225,22 +1548,6 @@ function validatePopularJSON(data) {
 
         throw new Error(
             "popular.json je prazan."
-        );
-
-    }
-
-
-    /* -----------------------------------------
-       GLAVNI OBJEKAT
-    ----------------------------------------- */
-
-    if (
-        typeof data !== "object" ||
-        Array.isArray(data)
-    ) {
-
-        throw new Error(
-            "popular.json mora biti objekat."
         );
 
     }
@@ -1254,10 +1561,6 @@ function validatePopularJSON(data) {
 
     ];
 
-
-    /* -----------------------------------------
-       SVE 3 KATEGORIJE
-    ----------------------------------------- */
 
     categories.forEach(
 
@@ -1290,7 +1593,7 @@ function validatePopularJSON(data) {
 
             data[category].forEach(
 
-                function(item, index) {
+                function(item) {
 
                     if (
                         !item ||
@@ -1298,34 +1601,39 @@ function validatePopularJSON(data) {
                     ) {
 
                         throw new Error(
-                            `${category}[${index}] nije objekat.`
+                            `${category} ima nevalidan element.`
+                        );
+
+                    }
+
+
+                    if (!item.id) {
+
+                        throw new Error(
+                            `${category} ima element bez id.`
                         );
 
                     }
 
 
                     if (
-                        typeof item.id !== "string" ||
-                        !item.id.trim()
+                        typeof item.views !==
+                        "number"
                     ) {
 
                         throw new Error(
-                            `${category}[${index}] nema validan id.`
+                            `${category} ${item.id} nema validan views.`
                         );
 
                     }
 
 
                     if (
-                        typeof item.views !== "number" ||
-                        !Number.isFinite(
-                            item.views
-                        ) ||
                         item.views < 0
                     ) {
 
                         throw new Error(
-                            `${category}[${index}] nema validan views.`
+                            `${category} ${item.id} ima negativan views.`
                         );
 
                     }
@@ -1368,56 +1676,117 @@ function validatePopularJSON(data) {
 
 
 /* =========================================================
+   PROVERA DA LI SVI ID-jevi POSTOJE U posts.json
+========================================================= */
+
+function validateIdsAgainstPosts(
+
+    data,
+
+    validIds
+
+) {
+
+    section(
+        "11. PROVERA ID-JEVA"
+    );
+
+
+    const categories = [
+
+        "today",
+        "last30Days",
+        "allTime"
+
+    ];
+
+
+    let errors = 0;
+
+
+    categories.forEach(
+
+        function(category) {
+
+            data[category].forEach(
+
+                function(item) {
+
+                    const id =
+                        normalizeId(
+                            item.id
+                        );
+
+
+                    if (
+                        !validIds.has(id)
+                    ) {
+
+                        errors++;
+
+                        console.error(
+                            `❌ ${category}: ${id} ne postoji u posts.json`
+                        );
+
+                    }
+
+                }
+
+            );
+
+        }
+
+    );
+
+
+    if (errors > 0) {
+
+        throw new Error(
+            "popular.json sadrzi ID-jeve koji ne postoje u posts.json."
+        );
+
+    }
+
+
+    console.log(
+        "Svi popular ID-jevi postoje u posts.json."
+    );
+
+}
+
+
+/* =========================================================
    NAPRAVI popular.json
 ========================================================= */
 
 function createPopularJSON(
 
-    popularOduvek,
+    popularnoDanas,
 
-    popular30Dana,
+    popularno30Dana,
 
-    popularDanas
+    popularnoOduvek
 
 ) {
 
     section(
-        "8. PRAVLJENJE popular.json"
+        "9. PRAVLJENJE popular.json"
     );
 
 
     const output = {
 
         today:
-            formatList(
-                popularDanas
-            ),
+            popularnoDanas,
 
         last30Days:
-            formatList(
-                popular30Dana
-            ),
+            popularno30Dana,
 
         allTime:
-            formatList(
-                popularOduvek
-            )
+            popularnoOduvek
 
     };
 
-
-    /* -----------------------------------------
-       VALIDIRAJ PRE UPISA
-    ----------------------------------------- */
-
-    validatePopularJSON(
-        output
-    );
-
-
-    /* -----------------------------------------
-       SACUVAJ
-    ----------------------------------------- */
 
     fs.writeFileSync(
 
@@ -1434,10 +1803,8 @@ function createPopularJSON(
     );
 
 
-    console.log("");
-
     console.log(
-        "popular.json uspesno napravljen."
+        "popular.json napravljen."
     );
 
 
@@ -1447,80 +1814,30 @@ function createPopularJSON(
     );
 
 
-    /* -----------------------------------------
-       ISPIS
-    ----------------------------------------- */
-
     printTop(
         "TOP 10 - TODAY",
-        popularDanas
+        popularnoDanas
     );
 
 
     printTop(
         "TOP 10 - LAST 30 DAYS",
-        popular30Dana
+        popularno30Dana
     );
 
 
     printTop(
         "TOP 10 - ALL TIME",
-        popularOduvek
+        popularnoOduvek
+    );
+
+
+    validatePopularJSON(
+        output
     );
 
 
     return output;
-
-}
-
-
-/* =========================================================
-   PRINT TOP
-========================================================= */
-
-function printTop(
-
-    title,
-
-    data
-
-) {
-
-    console.log("");
-
-    console.log(
-        title
-    );
-
-
-    if (
-        !Array.isArray(data) ||
-        data.length === 0
-    ) {
-
-        console.log(
-            "Nema podataka."
-        );
-
-
-        return;
-
-    }
-
-
-    data.forEach(
-
-        function(item, index) {
-
-            console.log(
-
-                `${index + 1}. ${item.id} - ${item.visits} pregleda`
-
-            );
-
-        }
-
-    );
 
 }
 
@@ -1557,7 +1874,19 @@ async function createPopularJSONProcess() {
     try {
 
         /* =================================================
-           1. CREDENTIALS
+           1. POSTS.JSON
+        ================================================= */
+
+        const catalog =
+            loadPosts();
+
+
+        const validIds =
+            catalog.validIds;
+
+
+        /* =================================================
+           2. CREDENTIALS
         ================================================= */
 
         const credentials =
@@ -1565,7 +1894,7 @@ async function createPopularJSONProcess() {
 
 
         /* =================================================
-           2. AUTH
+           3. AUTH
         ================================================= */
 
         const auth =
@@ -1575,7 +1904,7 @@ async function createPopularJSONProcess() {
 
 
         /* =================================================
-           3. TOKEN
+           4. TOKEN
         ================================================= */
 
         await testGoogleAuthentication(
@@ -1584,7 +1913,7 @@ async function createPopularJSONProcess() {
 
 
         /* =================================================
-           4. GA4 CLIENT
+           5. GA4 CLIENT
         ================================================= */
 
         const analyticsDataClient =
@@ -1594,7 +1923,7 @@ async function createPopularJSONProcess() {
 
 
         /* =================================================
-           5. PROPERTY
+           6. PROPERTY
         ================================================= */
 
         await testGA4Property(
@@ -1603,13 +1932,22 @@ async function createPopularJSONProcess() {
 
 
         /* =================================================
-           6A. TODAY
+           7A. TODAY
         ================================================= */
 
         section(
-            "6A. TODAY"
+            "7A. TODAY"
         );
 
+
+        /*
+         * NEMA FALLBACKA NA YESTERDAY.
+         *
+         * Ako GA4 danas jos nema podatke,
+         * today ostaje [].
+         *
+         * To je ispravno.
+         */
 
         const danas =
             await getPeriodData(
@@ -1620,17 +1958,19 @@ async function createPopularJSONProcess() {
 
                 "today",
 
-                "today"
+                "today",
+
+                validIds
 
             );
 
 
         /* =================================================
-           6B. LAST 30 DAYS
+           7B. LAST 30 DAYS
         ================================================= */
 
         section(
-            "6B. LAST 30 DAYS"
+            "7B. LAST 30 DAYS"
         );
 
 
@@ -1643,17 +1983,19 @@ async function createPopularJSONProcess() {
 
                 "30daysAgo",
 
-                "yesterday"
+                "yesterday",
+
+                validIds
 
             );
 
 
         /* =================================================
-           6C. ALL TIME
+           7C. ALL TIME
         ================================================= */
 
         section(
-            "6C. ALL TIME"
+            "7C. ALL TIME"
         );
 
 
@@ -1666,73 +2008,44 @@ async function createPopularJSONProcess() {
 
                 ALL_TIME_START_DATE,
 
-                "today"
+                "today",
+
+                validIds
 
             );
 
 
         /* =================================================
-           7. TOP LISTE
+           8. PRAVLJENJE JSON-a
         ================================================= */
 
-        section(
-            "7. OBRADA TOP LISTA"
-        );
+        const output =
+            createPopularJSON(
 
+                danas,
 
-        const popularnoDanas =
-            getTop(
-                danas
-            );
+                poslednjih30,
 
-
-        const popularno30Dana =
-            getTop(
-                poslednjih30
-            );
-
-
-        const popularnoOduvek =
-            getTop(
                 oduvek
+
             );
 
 
-        console.log(
-            "TODAY:",
-            popularnoDanas.length
-        );
-
-
-        console.log(
-            "LAST 30 DAYS:",
-            popularno30Dana.length
-        );
-
-
-        console.log(
-            "ALL TIME:",
-            popularnoOduvek.length
-        );
-
-
         /* =================================================
-           8. NAPRAVI JSON
+           9. PROVERA ID-JEVA
         ================================================= */
 
-        createPopularJSON(
+        validateIdsAgainstPosts(
 
-            popularnoOduvek,
+            output,
 
-            popularno30Dana,
-
-            popularnoDanas
+            validIds
 
         );
 
 
         /* =================================================
-           USPESNO
+           SUCCESS
         ================================================= */
 
         section(
@@ -1741,62 +2054,72 @@ async function createPopularJSONProcess() {
 
 
         console.log(
-            "Google Service Account OK"
+            "Google Service Account: OK"
         );
 
 
         console.log(
-            "Google Auth OK"
+            "Google Auth: OK"
         );
 
 
         console.log(
-            "OAuth token OK"
+            "OAuth token: OK"
         );
 
 
         console.log(
-            "GA4 Data API OK"
+            "GA4 Data API: OK"
         );
 
 
         console.log(
-            "GA4 Property OK"
+            "GA4 Property: OK"
         );
 
 
         console.log(
-            "Today OK"
+            "posts.json: OK"
         );
 
 
         console.log(
-            "Last 30 Days OK"
+            "Today: OK"
         );
 
 
         console.log(
-            "All Time OK"
+            "Last 30 Days: OK"
         );
 
 
         console.log(
-            "Filtriranje OK"
+            "All Time: OK"
         );
 
 
         console.log(
-            "Duplikati OK"
+            "Epizode: IGNORISANE"
         );
 
 
         console.log(
-            "TOP 10 OK"
+            "Player stranice: IGNORISANE"
         );
 
 
         console.log(
-            "popular.json OK"
+            "Nepoznati ID-jevi: IGNORISANI"
+        );
+
+
+        console.log(
+            "TOP 10: OK"
+        );
+
+
+        console.log(
+            "popular.json: OK"
         );
 
 
