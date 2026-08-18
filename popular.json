@@ -1,13 +1,50 @@
 {
-    "today": [],
-    "last30Days": [
+    "today": [
         {
-            "id": "ayse",
-            "views": 9
+            "id": "50m2",
+            "views": 28
+        },
+        {
+            "id": "detinjstvo-cocukluk",
+            "views": 4
         },
         {
             "id": "doktor-baska-hayatta-doktor-u-drugom-zivotu",
-            "views": 6
+            "views": 4
+        },
+        {
+            "id": "crne-beretke-siyah-bere",
+            "views": 3
+        },
+        {
+            "id": "falsifikator-kalpazan",
+            "views": 3
+        },
+        {
+            "id": "budjenje-velikog-seldzuka-uyanis-buyuk-selcuklu",
+            "views": 2
+        },
+        {
+            "id": "osmeh-gulumse-yeter",
+            "views": 2
+        },
+        {
+            "id": "akinci",
+            "views": 1
+        },
+        {
+            "id": "bekstvo-beg-kacis",
+            "views": 1
+        },
+        {
+            "id": "crna-ruza-karagul",
+            "views": 1
+        }
+    ],
+    "last30Days": [
+        {
+            "id": "doktor-baska-hayatta-doktor-u-drugom-zivotu",
+            "views": 7
         },
         {
             "id": "crne-beretke-siyah-bere",
@@ -20,19 +57,43 @@
     ],
     "allTime": [
         {
-            "id": "ayse",
-            "views": 9
+            "id": "50m2",
+            "views": 28
         },
         {
             "id": "doktor-baska-hayatta-doktor-u-drugom-zivotu",
-            "views": 6
+            "views": 11
         },
         {
             "id": "crne-beretke-siyah-bere",
+            "views": 4
+        },
+        {
+            "id": "detinjstvo-cocukluk",
+            "views": 4
+        },
+        {
+            "id": "falsifikator-kalpazan",
+            "views": 3
+        },
+        {
+            "id": "budjenje-velikog-seldzuka-uyanis-buyuk-selcuklu",
+            "views": 2
+        },
+        {
+            "id": "osmeh-gulumse-yeter",
+            "views": 2
+        },
+        {
+            "id": "akinci",
             "views": 1
         },
         {
-            "id": "sudbina-moje-cerke-goc-zamani",
+            "id": "bekstvo-beg-kacis",
+            "views": 1
+        },
+        {
+            "id": "crna-ruza-karagul",
             "views": 1
         }
     ]
