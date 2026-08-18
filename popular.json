@@ -5,19 +5,23 @@
             "views": 28
         },
         {
+            "id": "doktor-baska-hayatta-doktor-u-drugom-zivotu",
+            "views": 18
+        },
+        {
+            "id": "crne-beretke-siyah-bere",
+            "views": 10
+        },
+        {
             "id": "detinjstvo-cocukluk",
             "views": 4
         },
         {
-            "id": "doktor-baska-hayatta-doktor-u-drugom-zivotu",
-            "views": 4
-        },
-        {
-            "id": "crne-beretke-siyah-bere",
+            "id": "falsifikator-kalpazan",
             "views": 3
         },
         {
-            "id": "falsifikator-kalpazan",
+            "id": "sudbina-moje-cerke-goc-zamani",
             "views": 3
         },
         {
@@ -34,10 +38,6 @@
         },
         {
             "id": "bekstvo-beg-kacis",
-            "views": 1
-        },
-        {
-            "id": "crna-ruza-karagul",
             "views": 1
         }
     ],
@@ -62,10 +62,14 @@
         },
         {
             "id": "doktor-baska-hayatta-doktor-u-drugom-zivotu",
-            "views": 11
+            "views": 25
         },
         {
             "id": "crne-beretke-siyah-bere",
+            "views": 11
+        },
+        {
+            "id": "sudbina-moje-cerke-goc-zamani",
             "views": 4
         },
         {
@@ -90,10 +94,6 @@
         },
         {
             "id": "bekstvo-beg-kacis",
-            "views": 1
-        },
-        {
-            "id": "crna-ruza-karagul",
             "views": 1
         }
     ]
