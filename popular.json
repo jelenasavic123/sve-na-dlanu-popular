@@ -1,16 +1,21 @@
 {
-    "today": [
+    "today": [],
+    "last30Days": [
         {
             "id": "50m2",
             "views": 28
         },
         {
             "id": "doktor-baska-hayatta-doktor-u-drugom-zivotu",
-            "views": 18
+            "views": 27
         },
         {
             "id": "crne-beretke-siyah-bere",
-            "views": 10
+            "views": 11
+        },
+        {
+            "id": "sudbina-moje-cerke-goc-zamani",
+            "views": 4
         },
         {
             "id": "detinjstvo-cocukluk",
@@ -18,10 +23,6 @@
         },
         {
             "id": "falsifikator-kalpazan",
-            "views": 3
-        },
-        {
-            "id": "sudbina-moje-cerke-goc-zamani",
             "views": 3
         },
         {
@@ -41,20 +42,6 @@
             "views": 1
         }
     ],
-    "last30Days": [
-        {
-            "id": "doktor-baska-hayatta-doktor-u-drugom-zivotu",
-            "views": 7
-        },
-        {
-            "id": "crne-beretke-siyah-bere",
-            "views": 1
-        },
-        {
-            "id": "sudbina-moje-cerke-goc-zamani",
-            "views": 1
-        }
-    ],
     "allTime": [
         {
             "id": "50m2",
@@ -62,7 +49,7 @@
         },
         {
             "id": "doktor-baska-hayatta-doktor-u-drugom-zivotu",
-            "views": 25
+            "views": 27
         },
         {
             "id": "crne-beretke-siyah-bere",
