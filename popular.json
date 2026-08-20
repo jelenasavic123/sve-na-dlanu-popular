@@ -2,16 +2,20 @@
     "today": [],
     "last30Days": [
         {
+            "id": "ayse",
+            "views": 153
+        },
+        {
+            "id": "doktor-baska-hayatta-doktor-u-drugom-zivotu",
+            "views": 28
+        },
+        {
             "id": "50m2",
             "views": 28
         },
         {
-            "id": "doktor-baska-hayatta-doktor-u-drugom-zivotu",
-            "views": 27
-        },
-        {
             "id": "crne-beretke-siyah-bere",
-            "views": 11
+            "views": 12
         },
         {
             "id": "sudbina-moje-cerke-goc-zamani",
@@ -22,38 +26,38 @@
             "views": 4
         },
         {
+            "id": "budjenje-velikog-seldzuka-uyanis-buyuk-selcuklu",
+            "views": 3
+        },
+        {
             "id": "falsifikator-kalpazan",
             "views": 3
         },
         {
-            "id": "budjenje-velikog-seldzuka-uyanis-buyuk-selcuklu",
-            "views": 2
-        },
-        {
             "id": "osmeh-gulumse-yeter",
-            "views": 2
+            "views": 3
         },
         {
             "id": "akinci",
-            "views": 1
-        },
-        {
-            "id": "bekstvo-beg-kacis",
-            "views": 1
+            "views": 2
         }
     ],
     "allTime": [
         {
+            "id": "ayse",
+            "views": 153
+        },
+        {
+            "id": "doktor-baska-hayatta-doktor-u-drugom-zivotu",
+            "views": 28
+        },
+        {
             "id": "50m2",
             "views": 28
         },
         {
-            "id": "doktor-baska-hayatta-doktor-u-drugom-zivotu",
-            "views": 27
-        },
-        {
             "id": "crne-beretke-siyah-bere",
-            "views": 11
+            "views": 12
         },
         {
             "id": "sudbina-moje-cerke-goc-zamani",
@@ -64,24 +68,20 @@
             "views": 4
         },
         {
+            "id": "budjenje-velikog-seldzuka-uyanis-buyuk-selcuklu",
+            "views": 3
+        },
+        {
             "id": "falsifikator-kalpazan",
             "views": 3
         },
         {
-            "id": "budjenje-velikog-seldzuka-uyanis-buyuk-selcuklu",
-            "views": 2
-        },
-        {
             "id": "osmeh-gulumse-yeter",
-            "views": 2
+            "views": 3
         },
         {
             "id": "akinci",
-            "views": 1
-        },
-        {
-            "id": "bekstvo-beg-kacis",
-            "views": 1
+            "views": 2
         }
     ]
 }
