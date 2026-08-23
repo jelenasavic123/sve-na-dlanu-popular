@@ -1,1 +1,231 @@
-
+{
+    "today": [],
+    "last30Days": [
+        {
+            "id": "ayse",
+            "views": 153
+        },
+        {
+            "id": "doktor-baska-hayatta-doktor-u-drugom-zivotu",
+            "views": 28
+        },
+        {
+            "id": "50m2",
+            "views": 28
+        },
+        {
+            "id": "crne-beretke-siyah-bere",
+            "views": 12
+        },
+        {
+            "id": "sudbina-moje-cerke-goc-zamani",
+            "views": 4
+        },
+        {
+            "id": "detinjstvo-cocukluk",
+            "views": 4
+        },
+        {
+            "id": "budjenje-velikog-seldzuka-uyanis-buyuk-selcuklu",
+            "views": 3
+        },
+        {
+            "id": "falsifikator-kalpazan",
+            "views": 3
+        },
+        {
+            "id": "osmeh-gulumse-yeter",
+            "views": 3
+        },
+        {
+            "id": "akinci",
+            "views": 2
+        },
+        {
+            "id": "deca-sestara-kardes-cocuklari",
+            "views": 2
+        },
+        {
+            "id": "samo-17-daha-on-yedi",
+            "views": 2
+        },
+        {
+            "id": "bekstvo-beg-kacis",
+            "views": 1
+        },
+        {
+            "id": "crna-ruza-karagul",
+            "views": 1
+        },
+        {
+            "id": "crna-zima-kara-kis",
+            "views": 1
+        },
+        {
+            "id": "jedan-od-nas-icimizden-biri",
+            "views": 1
+        },
+        {
+            "id": "jedna-nocna-prica-bir-gece-masali",
+            "views": 1
+        },
+        {
+            "id": "melekina-ljubav-meleklerin-aski",
+            "views": 1
+        },
+        {
+            "id": "moj-dom-zejnep-dogdugun-ev-kaderindir",
+            "views": 1
+        },
+        {
+            "id": "nasa-tajna-ikimizin-sirri",
+            "views": 1
+        },
+        {
+            "id": "neprijatelj-ljubavi-aska-dusman",
+            "views": 1
+        },
+        {
+            "id": "otkucaj-srca-kalp-atisi",
+            "views": 1
+        },
+        {
+            "id": "prljava-igra-oyunbozan",
+            "views": 1
+        },
+        {
+            "id": "sakrio-sam-te-u-srcu-seni-kalbime-saklad-m",
+            "views": 1
+        },
+        {
+            "id": "sandokan",
+            "views": 1
+        },
+        {
+            "id": "zakoni-prirode-doganin-kanunu",
+            "views": 1
+        },
+        {
+            "id": "zemlja-bez-zakona-kanunsuz-toprakla",
+            "views": 1
+        },
+        {
+            "id": "rat-ruza-gullerin-savasi",
+            "views": 1
+        }
+    ],
+    "allTime": [
+        {
+            "id": "ayse",
+            "views": 153
+        },
+        {
+            "id": "doktor-baska-hayatta-doktor-u-drugom-zivotu",
+            "views": 28
+        },
+        {
+            "id": "50m2",
+            "views": 28
+        },
+        {
+            "id": "crne-beretke-siyah-bere",
+            "views": 12
+        },
+        {
+            "id": "sudbina-moje-cerke-goc-zamani",
+            "views": 4
+        },
+        {
+            "id": "detinjstvo-cocukluk",
+            "views": 4
+        },
+        {
+            "id": "budjenje-velikog-seldzuka-uyanis-buyuk-selcuklu",
+            "views": 3
+        },
+        {
+            "id": "falsifikator-kalpazan",
+            "views": 3
+        },
+        {
+            "id": "osmeh-gulumse-yeter",
+            "views": 3
+        },
+        {
+            "id": "akinci",
+            "views": 2
+        },
+        {
+            "id": "deca-sestara-kardes-cocuklari",
+            "views": 2
+        },
+        {
+            "id": "samo-17-daha-on-yedi",
+            "views": 2
+        },
+        {
+            "id": "bekstvo-beg-kacis",
+            "views": 1
+        },
+        {
+            "id": "crna-ruza-karagul",
+            "views": 1
+        },
+        {
+            "id": "crna-zima-kara-kis",
+            "views": 1
+        },
+        {
+            "id": "jedan-od-nas-icimizden-biri",
+            "views": 1
+        },
+        {
+            "id": "jedna-nocna-prica-bir-gece-masali",
+            "views": 1
+        },
+        {
+            "id": "melekina-ljubav-meleklerin-aski",
+            "views": 1
+        },
+        {
+            "id": "moj-dom-zejnep-dogdugun-ev-kaderindir",
+            "views": 1
+        },
+        {
+            "id": "nasa-tajna-ikimizin-sirri",
+            "views": 1
+        },
+        {
+            "id": "neprijatelj-ljubavi-aska-dusman",
+            "views": 1
+        },
+        {
+            "id": "otkucaj-srca-kalp-atisi",
+            "views": 1
+        },
+        {
+            "id": "prljava-igra-oyunbozan",
+            "views": 1
+        },
+        {
+            "id": "sakrio-sam-te-u-srcu-seni-kalbime-saklad-m",
+            "views": 1
+        },
+        {
+            "id": "sandokan",
+            "views": 1
+        },
+        {
+            "id": "zakoni-prirode-doganin-kanunu",
+            "views": 1
+        },
+        {
+            "id": "zemlja-bez-zakona-kanunsuz-toprakla",
+            "views": 1
+        },
+        {
+            "id": "rat-ruza-gullerin-savasi",
+            "views": 1
+        }
+    ]
+}
