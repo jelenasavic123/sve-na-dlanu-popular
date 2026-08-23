@@ -17,6 +17,9 @@
        last30Days
        allTime
 
+   SVAKA LISTA:
+       MAKSIMALNO 50 SERIJA
+
    FORMAT:
 
    {
@@ -64,13 +67,17 @@ const {
 const PROPERTY_ID = "549759235";
 
 /*
- * Koliko serija šaljemo u svaku popularnu kategoriju.
+ * BROJ SERIJA KOJE ŠALJEMO U SVAKU KATEGORIJU
  *
- * 30 je namerno:
- * frontend ima dovoljno kandidata
- * da može da meša i izbegava duplikate.
+ * today       -> do 50
+ * last30Days  -> do 50
+ * allTime     -> do 50
+ *
+ * UKUPNO:
+ * maksimalno 150 zapisa.
  */
-const TOP_LIMIT = 30;
+
+const TOP_LIMIT = 50;
 
 const POSTS_URL =
     "https://nadlanu.online/posts.json";
@@ -173,18 +180,22 @@ function loadPostsFromCloudflare() {
         function(resolve, reject) {
 
             console.log("");
+
             console.log(
                 "URL:"
             );
+
             console.log(
                 POSTS_URL
             );
+
 
             https.get(
                 POSTS_URL,
                 function(response) {
 
                     let body = "";
+
 
                     response.setEncoding(
                         "utf8"
@@ -342,10 +353,6 @@ function createSeriesMap(posts) {
             }
 
 
-            /*
-             * Čuvamo osnovne podatke samo za proveru.
-             */
-
             seriesMap.set(
                 id,
                 {
@@ -366,6 +373,7 @@ function createSeriesMap(posts) {
 
 
     console.log("");
+
     console.log(
         "Kreirana lista dozvoljenih serija:"
     );
@@ -823,10 +831,6 @@ function normalizePath(
         .trim();
 
 
-    /*
-     * Ako GA4 vrati puni URL.
-     */
-
     try {
 
         if (
@@ -857,10 +861,6 @@ function normalizePath(
     }
 
 
-    /*
-     * Hash uklanjamo.
-     */
-
     const hashIndex =
         value.indexOf("#");
 
@@ -877,10 +877,6 @@ function normalizePath(
 
     }
 
-
-    /*
-     * Ukloni pocetne slashove.
-     */
 
     value =
         value.replace(
@@ -1064,13 +1060,7 @@ function findSeriesId(
 
 
     /*
-     * -----------------------------------------------------
      * 1. QUERY PARAMETAR
-     *
-     * npr:
-     *
-     * ?id=ayse
-     * -----------------------------------------------------
      */
 
     const queryId =
@@ -1092,9 +1082,7 @@ function findSeriesId(
 
 
     /*
-     * -----------------------------------------------------
      * 2. NORMALIZOVANA PUTANJA
-     * -----------------------------------------------------
      */
 
     const normalized =
@@ -1111,9 +1099,23 @@ function findSeriesId(
 
 
     /*
-     * Izbacujemo query deo
-     * kada gledamo segmente.
+     * Ako URL izgleda kao epizoda,
+     * ne tretiramo epizodu kao posebnu seriju.
      */
+
+    if (
+        looksLikeEpisode(
+            normalized
+        )
+    ) {
+
+        /*
+         * I dalje pokušavamo pronaći ID serije
+         * među segmentima.
+         */
+
+    }
+
 
     const pathOnly =
         normalized.split(
@@ -1137,24 +1139,7 @@ function findSeriesId(
 
 
     /*
-     * -----------------------------------------------------
      * 3. TAČNO POKLAPANJE SEGMENTA
-     *
-     * Ovo je jako važno.
-     *
-     * Ako imamo:
-     *
-     * /ayse
-     *
-     * -> ayse
-     *
-     * Ako imamo:
-     *
-     * /series/ayse
-     *
-     * -> ayse
-     *
-     * -----------------------------------------------------
      */
 
     for (
@@ -1192,9 +1177,7 @@ function findSeriesId(
 
 
     /*
-     * -----------------------------------------------------
-     * 4. AKO JE POSLEDNJI SEGMENT ID
-     * -----------------------------------------------------
+     * 4. POSLEDNJI SEGMENT
      */
 
     let last =
@@ -1239,12 +1222,6 @@ function findSeriesId(
 
     }
 
-
-    /*
-     * -----------------------------------------------------
-     * 5. NIJE PRONAĐENA SERIJA
-     * -----------------------------------------------------
-     */
 
     return null;
 
@@ -1351,6 +1328,12 @@ async function getPeriodData(
 
                 ],
 
+                /*
+                 * GA4 moze vratiti mnogo URL-ova.
+                 * Uzima se dovoljno velik broj da
+                 * ne izgubimo serije.
+                 */
+
                 limit:
                     100000
 
@@ -1367,23 +1350,9 @@ async function getPeriodData(
         );
 
 
-        /*
-         * -------------------------------------------------
-         * MAPA:
-         *
-         * series ID -> views
-         * -------------------------------------------------
-         */
-
         const totals =
             new Map();
 
-
-        /*
-         * -------------------------------------------------
-         * STATISTIKA ZA DEBUG
-         * -------------------------------------------------
-         */
 
         let matchedRows =
             0;
@@ -1394,14 +1363,6 @@ async function getPeriodData(
         let totalViews =
             0;
 
-
-        /*
-         * -------------------------------------------------
-         * ISPIS SIROVIH GA4 REZULTATA
-         *
-         * Prikazujemo samo prvih 50.
-         * -------------------------------------------------
-         */
 
         console.log("");
 
@@ -1449,12 +1410,6 @@ async function getPeriodData(
         );
 
 
-        /*
-         * -------------------------------------------------
-         * OBRADA SVIH REDOVA
-         * -------------------------------------------------
-         */
-
         rows.forEach(
             function(row) {
 
@@ -1488,21 +1443,12 @@ async function getPeriodData(
                     views;
 
 
-                /*
-                 * Pronađi seriju.
-                 */
-
                 const seriesId =
                     findSeriesId(
                         pagePath,
                         seriesMap
                     );
 
-
-                /*
-                 * Ako nije serija iz posts.json
-                 * ignorišemo.
-                 */
 
                 if (!seriesId) {
 
@@ -1530,12 +1476,6 @@ async function getPeriodData(
             }
         );
 
-
-        /*
-         * -------------------------------------------------
-         * PRETVORI MAPU U NIZ
-         * -------------------------------------------------
-         */
 
         const result = [];
 
@@ -1567,10 +1507,6 @@ async function getPeriodData(
             }
         );
 
-
-        /*
-         * Sortiranje.
-         */
 
         result.sort(
             function(a, b) {
@@ -1616,16 +1552,10 @@ async function getPeriodData(
         );
 
 
-        /*
-         * -------------------------------------------------
-         * PRIKAZ PREPOZNATIH SERIJA
-         * -------------------------------------------------
-         */
-
         console.log("");
 
         console.log(
-            "PREPOZNATE SERIJE:"
+            "TOP 50 PREPOZNATIH SERIJA:"
         );
 
         console.log(
@@ -1805,9 +1735,7 @@ function printTop(
 
 
             console.log(
-
                 `${index + 1}. ${item.id} - ${titleText} - ${item.views} pregleda`
-
             );
 
         }
@@ -1835,25 +1763,30 @@ function formatList(
     }
 
 
-    return data.map(
-        function(item) {
+    return data
+        .slice(
+            0,
+            TOP_LIMIT
+        )
+        .map(
+            function(item) {
 
-            return {
+                return {
 
-                id:
-                    String(
-                        item.id
-                    ),
+                    id:
+                        String(
+                            item.id
+                        ),
 
-                views:
-                    Number(
-                        item.views || 0
-                    )
+                    views:
+                        Number(
+                            item.views || 0
+                        )
 
-            };
+                };
 
-        }
-    );
+            }
+        );
 
 }
 
@@ -1908,6 +1841,14 @@ function validatePopularJSON(
 
             }
 
+
+            /*
+             * VAŽNO:
+             *
+             * OVDE VIŠE NEMA 10.
+             *
+             * Koristi se TOP_LIMIT = 50.
+             */
 
             if (
                 data[category].length >
@@ -1977,19 +1918,25 @@ function validatePopularJSON(
 
     console.log(
         "✅ today:",
-        data.today.length
+        data.today.length,
+        "/",
+        TOP_LIMIT
     );
 
 
     console.log(
         "✅ last30Days:",
-        data.last30Days.length
+        data.last30Days.length,
+        "/",
+        TOP_LIMIT
     );
 
 
     console.log(
         "✅ allTime:",
-        data.allTime.length
+        data.allTime.length,
+        "/",
+        TOP_LIMIT
     );
 
 
@@ -2071,21 +2018,21 @@ function createPopularJSON(
 
 
     printTop(
-        "TOP 10 - TODAY",
+        "TOP 50 - TODAY",
         output.today,
         seriesMap
     );
 
 
     printTop(
-        "TOP 10 - LAST 30 DAYS",
+        "TOP 50 - LAST 30 DAYS",
         output.last30Days,
         seriesMap
     );
 
 
     printTop(
-        "TOP 10 - ALL TIME",
+        "TOP 50 - ALL TIME",
         output.allTime,
         seriesMap
     );
@@ -2134,6 +2081,15 @@ async function createPopularJSONProcess() {
     console.log(
         "Posts URL:",
         POSTS_URL
+    );
+
+
+    console.log("");
+
+    console.log(
+        "SVAKA KATEGORIJA MOZE IMATI DO",
+        TOP_LIMIT,
+        "SERIJA."
     );
 
 
@@ -2235,17 +2191,6 @@ async function createPopularJSONProcess() {
         );
 
 
-        /*
-         * NAMERNO NE KORISTIMO yesterday FALLBACK.
-         *
-         * Ako danas nema podataka:
-         *
-         * today = []
-         *
-         * To je tačnije nego da prikazujemo jučerašnje
-         * preglede kao današnje.
-         */
-
         const danas =
             await getPeriodData(
 
@@ -2313,11 +2258,11 @@ async function createPopularJSONProcess() {
 
 
         /* =================================================
-           8. TOP 10
+           8. TOP 50
         ================================================= */
 
         section(
-            "8. OBRADA TOP LISTA"
+            "8. OBRADA TOP 50 LISTA"
         );
 
 
@@ -2341,19 +2286,22 @@ async function createPopularJSONProcess() {
 
         console.log(
             "TODAY:",
-            popularnoDanas.length
+            popularnoDanas.length,
+            "serija"
         );
 
 
         console.log(
             "LAST 30 DAYS:",
-            popularno30Dana.length
+            popularno30Dana.length,
+            "serija"
         );
 
 
         console.log(
             "ALL TIME:",
-            popularnoOduvek.length
+            popularnoOduvek.length,
+            "serija"
         );
 
 
@@ -2414,17 +2362,17 @@ async function createPopularJSONProcess() {
 
 
         console.log(
-            "✅ Today"
+            "✅ Today - TOP 50"
         );
 
 
         console.log(
-            "✅ Last 30 Days"
+            "✅ Last 30 Days - TOP 50"
         );
 
 
         console.log(
-            "✅ All Time"
+            "✅ All Time - TOP 50"
         );
 
 
@@ -2444,7 +2392,7 @@ async function createPopularJSONProcess() {
 
 
         console.log(
-            "✅ TOP 10"
+            "✅ Maksimalno 50 po kategoriji"
         );
 
 
