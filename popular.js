@@ -63,7 +63,14 @@ const {
 
 const PROPERTY_ID = "549759235";
 
-const TOP_LIMIT = 10;
+/*
+ * Koliko serija šaljemo u svaku popularnu kategoriju.
+ *
+ * 30 je namerno:
+ * frontend ima dovoljno kandidata
+ * da može da meša i izbegava duplikate.
+ */
+const TOP_LIMIT = 30;
 
 const POSTS_URL =
     "https://nadlanu.online/posts.json";
