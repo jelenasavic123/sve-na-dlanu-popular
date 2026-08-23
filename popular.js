@@ -5,15 +5,45 @@
    AUTOMATSKO PRAVLJENJE popular.json
 
    VERZIJA:
-   - 50 serija po kategoriji
+   - TOP 50
    - today = 50
    - last30Days = 50
    - allTime = 50
-   - posts.json direktno sa Cloudflare-a
-   - samo ID-jevi koji postoje u posts.json
-   - epizode se ne prikazuju kao posebne stavke
-   - duplikati serija se spajaju
-   - rezultat se sortira po pregledima
+
+   VAŽNO:
+
+   - posts.json se učitava DIREKTNO sa Cloudflare-a
+   - NE TRAŽI lokalni posts.json
+   - koriste se SAMO ID-jevi koji postoje u posts.json
+   - EPIZODE SE NE PRIKAZUJU kao posebne stavke
+   - ako GA4 URL pripada seriji, pregled se pripisuje seriji
+   - ignorišu se stranice koje nisu serije
+   - duplikati se spajaju
+
+   FORMAT:
+
+   {
+       "today": [
+           {
+               "id": "ayse",
+               "views": 1520
+           }
+       ],
+
+       "last30Days": [
+           {
+               "id": "ayse",
+               "views": 24580
+           }
+       ],
+
+       "allTime": [
+           {
+               "id": "ayse",
+               "views": 135240
+           }
+       ]
+   }
 
 ========================================================= */
 
@@ -36,15 +66,18 @@ const {
 
 const PROPERTY_ID = "549759235";
 
-
-// VAŽNO:
-// SADA ŠALJEMO 50 SERIJA
+/*
+ * VAŽNO:
+ *
+ * Ne menjati na 10.
+ *
+ * Šaljemo 50 serija u svaku kategoriju
+ * da frontend može da meša rezultate.
+ */
 const TOP_LIMIT = 50;
-
 
 const POSTS_URL =
     "https://nadlanu.online/posts.json";
-
 
 const OUTPUT_FILE =
     path.join(
@@ -52,10 +85,8 @@ const OUTPUT_FILE =
         "popular.json"
     );
 
-
 const TIME_ZONE =
     "Europe/Belgrade";
-
 
 const ALL_TIME_START_DATE =
     "2020-01-01";
@@ -99,14 +130,11 @@ function maskEmail(email) {
 
     }
 
-
     const value =
         String(email);
 
-
     const parts =
         value.split("@");
-
 
     if (
         parts.length !== 2
@@ -116,14 +144,11 @@ function maskEmail(email) {
 
     }
 
-
     const name =
         parts[0];
 
-
     const domain =
         parts[1];
-
 
     if (
         name.length <= 2
@@ -132,7 +157,6 @@ function maskEmail(email) {
         return "***@" + domain;
 
     }
-
 
     return (
         name.substring(0, 2) +
@@ -163,71 +187,47 @@ function loadPostsFromCloudflare() {
             );
 
 
-            https.get(
-                POSTS_URL,
-                function(response) {
+            const request =
+                https.get(
+                    POSTS_URL,
+                    function(response) {
 
-                    let body = "";
-
-
-                    response.setEncoding(
-                        "utf8"
-                    );
+                        let body = "";
 
 
-                    response.on(
-                        "data",
-                        function(chunk) {
-
-                            body += chunk;
-
-                        }
-                    );
+                        response.setEncoding(
+                            "utf8"
+                        );
 
 
-                    response.on(
-                        "end",
-                        function() {
+                        response.on(
+                            "data",
+                            function(chunk) {
 
-                            console.log(
-                                "HTTP status:",
-                                response.statusCode
-                            );
-
-
-                            if (
-                                response.statusCode !== 200
-                            ) {
-
-                                reject(
-                                    new Error(
-                                        "Cloudflare nije vratio HTTP 200. Status: " +
-                                        response.statusCode
-                                    )
-                                );
-
-                                return;
+                                body += chunk;
 
                             }
+                        );
 
 
-                            try {
+                        response.on(
+                            "end",
+                            function() {
 
-                                const data =
-                                    JSON.parse(
-                                        body
-                                    );
+                                console.log(
+                                    "HTTP status:",
+                                    response.statusCode
+                                );
 
 
                                 if (
-                                    !Array.isArray(
-                                        data
-                                    )
+                                    response.statusCode !== 200
                                 ) {
 
                                     reject(
                                         new Error(
-                                            "posts.json nije niz."
+                                            "Cloudflare nije vratio HTTP 200. Status: " +
+                                            response.statusCode
                                         )
                                     );
 
@@ -236,39 +236,67 @@ function loadPostsFromCloudflare() {
                                 }
 
 
-                                console.log(
-                                    "✅ posts.json uspesno ucitan."
-                                );
+                                try {
+
+                                    const data =
+                                        JSON.parse(
+                                            body
+                                        );
 
 
-                                console.log(
-                                    "Ukupno serija:",
-                                    data.length
-                                );
+                                    if (
+                                        !Array.isArray(
+                                            data
+                                        )
+                                    ) {
+
+                                        reject(
+                                            new Error(
+                                                "posts.json nije niz."
+                                            )
+                                        );
+
+                                        return;
+
+                                    }
 
 
-                                resolve(
-                                    data
-                                );
+                                    console.log(
+                                        "✅ posts.json uspesno ucitan."
+                                    );
 
 
-                            } catch (error) {
+                                    console.log(
+                                        "Ukupno serija:",
+                                        data.length
+                                    );
 
-                                reject(
-                                    new Error(
-                                        "posts.json nije validan JSON: " +
-                                        error.message
-                                    )
-                                );
+
+                                    resolve(
+                                        data
+                                    );
+
+
+                                } catch (error) {
+
+                                    reject(
+                                        new Error(
+                                            "posts.json nije validan JSON: " +
+                                            error.message
+                                        )
+                                    );
+
+                                }
 
                             }
-
-                        }
-                    );
+                        );
 
 
-                }
-            ).on(
+                    }
+                );
+
+
+            request.on(
                 "error",
                 function(error) {
 
@@ -350,7 +378,6 @@ function createSeriesMap(posts) {
     console.log(
         "Kreirana lista dozvoljenih serija:"
     );
-
 
     console.log(
         seriesMap.size
@@ -947,6 +974,63 @@ function getIdFromQuery(
 
 
 /* =========================================================
+   DA LI JE EPIZODA
+========================================================= */
+
+function looksLikeEpisode(
+    value
+) {
+
+    const text =
+        String(
+            value || ""
+        )
+        .toLowerCase();
+
+
+    const patterns = [
+
+        /(^|\/)epizoda[-_ ]?\d+/i,
+
+        /(^|\/)episode[-_ ]?\d+/i,
+
+        /(^|\/)ep[-_ ]?\d+/i,
+
+        /(^|\/)e[-_ ]?\d+/i,
+
+        /(^|\/)season[-_ ]?\d+/i,
+
+        /(^|\/)sezona[-_ ]?\d+/i,
+
+        /(^|\/)s\d+e\d+/i
+
+    ];
+
+
+    for (
+        const pattern
+        of patterns
+    ) {
+
+        if (
+            pattern.test(
+                text
+            )
+        ) {
+
+            return true;
+
+        }
+
+    }
+
+
+    return false;
+
+}
+
+
+/* =========================================================
    PRONADJI SERIJU U GA4 PUTANJI
 ========================================================= */
 
@@ -1020,6 +1104,12 @@ function findSeriesId(
             "?"
         )[0];
 
+
+    /*
+     * Ako je epizoda,
+     * pokušavamo samo da pronađemo
+     * seriju kroz ostale segmente.
+     */
 
     const segments =
         pathOnly
@@ -1241,10 +1331,11 @@ async function getPeriodData(
                 ],
 
                 /*
-                 * GA4 moze vratiti veliki broj URL-ova.
-                 * 100000 ostavljamo da obuhvati sto vise podataka.
+                 * Ne ograničavamo na 50.
+                 *
+                 * GA4 treba da vrati dovoljno redova
+                 * da bismo mogli da skupimo 50 SERIJA.
                  */
-
                 limit:
                     100000
 
@@ -1268,10 +1359,8 @@ async function getPeriodData(
         let matchedRows =
             0;
 
-
         let ignoredRows =
             0;
-
 
         let totalViews =
             0;
@@ -1421,6 +1510,10 @@ async function getPeriodData(
         );
 
 
+        /*
+         * Najgledanije prvo.
+         */
+
         result.sort(
             function(a, b) {
 
@@ -1444,24 +1537,20 @@ async function getPeriodData(
             "REZULTAT PERIODA:"
         );
 
-
         console.log(
             "Ukupno GA4 pregleda:",
             totalViews
         );
-
 
         console.log(
             "Prepoznatih redova:",
             matchedRows
         );
 
-
         console.log(
             "Ignorisanih redova:",
             ignoredRows
         );
-
 
         console.log(
             "Pronadjenih serija:",
@@ -1472,9 +1561,8 @@ async function getPeriodData(
         console.log("");
 
         console.log(
-            `TOP ${TOP_LIMIT}:`
+            `TOP ${TOP_LIMIT} SERIJA:`
         );
-
 
         console.log(
             "------------------------------------------"
@@ -1599,10 +1687,7 @@ function getTop(
 
 
     /*
-     * OVO JE VAŽNO:
-     *
-     * sada uzimamo 50,
-     * a ne 10.
+     * OVDE JE 50.
      */
 
     return copy.slice(
@@ -1688,30 +1773,25 @@ function formatList(
     }
 
 
-    return data
-        .slice(
-            0,
-            TOP_LIMIT
-        )
-        .map(
-            function(item) {
+    return data.map(
+        function(item) {
 
-                return {
+            return {
 
-                    id:
-                        String(
-                            item.id
-                        ),
+                id:
+                    String(
+                        item.id
+                    ),
 
-                    views:
-                        Number(
-                            item.views || 0
-                        )
+                views:
+                    Number(
+                        item.views || 0
+                    )
 
-                };
+            };
 
-            }
-        );
+        }
+    );
 
 }
 
@@ -1768,15 +1848,10 @@ function validatePopularJSON(
 
 
             /*
-             * OVO JE GLAVNA ISPRAVKA.
+             * OVDE JE KLJUČNA IZMENA.
              *
-             * Pre je verovatno bilo:
-             *
-             * data[category].length > 10
-             *
-             * Sada mora biti:
-             *
-             * data[category].length > 50
+             * Više nije 10.
+             * Sada je 50.
              */
 
             if (
@@ -1818,17 +1893,17 @@ function validatePopularJSON(
                     }
 
 
-                    const normalizedId =
-                        String(
-                            item.id
-                        )
-                        .trim()
-                        .toLowerCase();
-
+                    /*
+                     * ID mora postojati u posts.json.
+                     */
 
                     if (
                         !seriesMap.has(
-                            normalizedId
+                            String(
+                                item.id
+                            )
+                            .trim()
+                            .toLowerCase()
                         )
                     ) {
 
@@ -1864,7 +1939,7 @@ function validatePopularJSON(
 
 
     console.log(
-        "✅ Maksimalno dozvoljeno:",
+        "✅ Limit:",
         TOP_LIMIT
     );
 
@@ -1903,29 +1978,24 @@ function createPopularJSON(
     const output = {
 
         /*
-         * 50 TODAY
+         * TOP 50
          */
-
         today:
             formatList(
                 popularnoDanas
             ),
 
-
         /*
-         * 50 LAST 30 DAYS
+         * TOP 50
          */
-
         last30Days:
             formatList(
                 popularno30Dana
             ),
 
-
         /*
-         * 50 ALL TIME
+         * TOP 50
          */
-
         allTime:
             formatList(
                 popularnoOduvek
@@ -1960,27 +2030,20 @@ function createPopularJSON(
     );
 
 
-    console.log("");
-
     console.log(
-        "Broj serija:"
-    );
-
-
-    console.log(
-        "TODAY:",
+        "Broj za today:",
         output.today.length
     );
 
 
     console.log(
-        "LAST 30 DAYS:",
+        "Broj za last30Days:",
         output.last30Days.length
     );
 
 
     console.log(
-        "ALL TIME:",
+        "Broj za allTime:",
         output.allTime.length
     );
 
@@ -2035,7 +2098,7 @@ async function createPopularJSONProcess() {
 
 
     console.log(
-        "Top limit:",
+        "TOP LIMIT:",
         TOP_LIMIT
     );
 
@@ -2052,10 +2115,25 @@ async function createPopularJSONProcess() {
     );
 
 
+    console.log("");
+
+    console.log(
+        "=========================================="
+    );
+
+    console.log(
+        `POPULAR.JS CE PRAVITI TOP ${TOP_LIMIT}`
+    );
+
+    console.log(
+        "=========================================="
+    );
+
+
     try {
 
         /* =================================================
-           1. POSTS.JSON
+           1. POSTS.JSON SA CLOUDFLARE-A
         ================================================= */
 
         section(
@@ -2221,7 +2299,7 @@ async function createPopularJSONProcess() {
         ================================================= */
 
         section(
-            "8. OBRADA TOP 50 LISTA"
+            `8. OBRADA TOP ${TOP_LIMIT} LISTA`
         );
 
 
@@ -2338,12 +2416,12 @@ async function createPopularJSONProcess() {
 
 
         console.log(
-            "✅ Duplikati spojeni"
+            "✅ Epizode nisu posebne stavke"
         );
 
 
         console.log(
-            "✅ Epizode nisu posebne stavke"
+            "✅ Duplikati spojeni"
         );
 
 
