@@ -102,7 +102,6 @@ jobs:
 
           echo "✅ Google Secret postoji."
 
-
           echo "$GOOGLE_SERVICE_ACCOUNT_JSON" \
             > /tmp/google-service-account.json
 
@@ -267,6 +266,8 @@ jobs:
 
       # =====================================================
       # 7. PROVERI popular.json
+      #
+      # SADA JE DOZVOLJENO MAKSIMALNO 50 SERIJA
       # =====================================================
 
       - name: Proveri popular.json
@@ -291,7 +292,12 @@ jobs:
 
           const fs = require("fs");
 
+
+          const MAX_ITEMS = 50;
+
+
           let data;
+
 
           try {
 
@@ -326,6 +332,22 @@ jobs:
 
           for (const list of lists) {
 
+              console.log("");
+
+              console.log(
+                  "------------------------------------------"
+              );
+
+              console.log(
+                  "PROVERA:",
+                  list
+              );
+
+              console.log(
+                  "------------------------------------------"
+              );
+
+
               if (!Array.isArray(data[list])) {
 
                   console.error(
@@ -337,10 +359,19 @@ jobs:
               }
 
 
-              if (data[list].length > 10) {
+              /*
+               * =============================================
+               * MAKSIMALNO 50 SERIJA
+               * =============================================
+               */
+
+              if (
+                  data[list].length >
+                  MAX_ITEMS
+              ) {
 
                   console.error(
-                      `❌ ${list} ima vise od 10 elemenata.`
+                      `❌ ${list} ima vise od ${MAX_ITEMS} elemenata.`
                   );
 
                   process.exit(1);
@@ -348,9 +379,21 @@ jobs:
               }
 
 
-              for (const item of data[list]) {
+              /*
+               * =============================================
+               * PROVERA SVAKOG ELEMENTA
+               * =============================================
+               */
 
-                  if (!item.id) {
+              for (
+                  const item
+                  of data[list]
+              ) {
+
+                  if (
+                      !item ||
+                      !item.id
+                  ) {
 
                       console.error(
                           `❌ ${list} ima element bez id.`
@@ -362,7 +405,8 @@ jobs:
 
 
                   if (
-                      typeof item.views !== "number"
+                      typeof item.views !==
+                      "number"
                   ) {
 
                       console.error(
@@ -373,9 +417,48 @@ jobs:
 
                   }
 
+
+                  if (
+                      item.views < 0
+                  ) {
+
+                      console.error(
+                          `❌ ${list}/${item.id} ima negativan broj pregleda.`
+                      );
+
+                      process.exit(1);
+
+                  }
+
               }
 
+
+              console.log(
+                  `✅ ${list}: ${data[list].length}/${MAX_ITEMS}`
+              );
+
           }
+
+
+          /*
+           * =============================================
+           * ZAVRSNA PROVERA
+           * =============================================
+           */
+
+          console.log("");
+
+          console.log(
+              "=========================================="
+          );
+
+          console.log(
+              "REZULTAT PROVERE"
+          );
+
+          console.log(
+              "=========================================="
+          );
 
 
           console.log(
@@ -397,19 +480,33 @@ jobs:
 
 
           console.log(
+              "✅ Maksimum po kategoriji:",
+              MAX_ITEMS
+          );
+
+
+          console.log(
               "✅ popular.json validan."
+          );
+
+
+          console.log(
+              "=========================================="
           );
 
           NODE
 
 
           echo ""
-          echo "SADRZAJ:"
+
+          echo "SADRZAJ popular.json:"
+
           echo "=========================================="
 
           cat popular.json
 
           echo ""
+
           echo "=========================================="
 
 
@@ -462,6 +559,7 @@ jobs:
           if git diff --cached --quiet; then
 
               echo ""
+
               echo "ℹ️ Nema promena u popular.json."
 
               exit 0
@@ -473,7 +571,8 @@ jobs:
           # COMMIT
           # =================================================
 
-          git commit -m "Update popular.json"
+          git commit \
+            -m "Update popular.json"
 
 
           # =================================================
@@ -481,30 +580,15 @@ jobs:
           # =================================================
 
           echo ""
+
           echo "=========================================="
+
           echo "SINHRONIZACIJA SA REMOTE MAIN"
+
           echo "=========================================="
 
 
           git fetch origin main
-
-
-          # =================================================
-          # PROVERI DA LI JE REMOTE PROMENJEN
-          # =================================================
-
-          LOCAL_COMMIT=$(git rev-parse HEAD)
-
-          REMOTE_COMMIT=$(git rev-parse origin/main)
-
-
-          echo "Local:"
-          echo "$LOCAL_COMMIT"
-
-          echo ""
-
-          echo "Remote:"
-          echo "$REMOTE_COMMIT"
 
 
           # =================================================
@@ -519,8 +603,11 @@ jobs:
           # =================================================
 
           echo ""
+
           echo "=========================================="
+
           echo "PUSH"
+
           echo "=========================================="
 
 
@@ -528,6 +615,9 @@ jobs:
 
 
           echo ""
+
           echo "=========================================="
+
           echo "✅ popular.json USPESNO POSLAT"
+
           echo "=========================================="
