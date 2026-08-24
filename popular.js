@@ -2220,29 +2220,62 @@ async function createPopularJSONProcess() {
 
 
         /* =================================================
-           7A. TODAY
-        ================================================= */
+   7A. TODAY
+================================================= */
 
-        section(
-            "7A. TODAY"
+section(
+    "7A. TODAY"
+);
+
+
+let danas =
+    await getPeriodData(
+
+        analyticsDataClient,
+
+        "Danas",
+
+        "1daysAgo",
+
+        "today",
+
+        seriesMap
+
+    );
+
+
+/*
+ * GA4 kasni sa obradom danasnjih podataka.
+ * Ako nema rezultata, uzimamo juce.
+ */
+
+if (
+    danas.length === 0
+) {
+
+    console.log("");
+
+    console.log(
+        "⚠️ Nema podataka za danas. Koristim juce."
+    );
+
+
+    danas =
+        await getPeriodData(
+
+            analyticsDataClient,
+
+            "Danas - fallback juce",
+
+            "yesterday",
+
+            "yesterday",
+
+            seriesMap
+
         );
 
-
-        const danas =
-            await getPeriodData(
-
-                analyticsDataClient,
-
-                "Danas",
-
-                "1daysAgo",
-
-                "today",
-
-                seriesMap
-
-            );
-
+}
 
         /* =================================================
            7B. LAST 30 DAYS
