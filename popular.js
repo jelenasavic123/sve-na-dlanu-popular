@@ -2235,7 +2235,7 @@ async function createPopularJSONProcess() {
 
                 "Danas",
 
-                "today",
+                "1daysAgo",
 
                 "today",
 
