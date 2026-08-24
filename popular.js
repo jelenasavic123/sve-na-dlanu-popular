@@ -4,80 +4,46 @@
 
    AUTOMATSKO PRAVLJENJE popular.json
 
-   VERZIJA:
-   - TOP 50
-   - today = 50
-   - last30Days = 50
-   - allTime = 50
+   TOP 50
+   today = 50
+   last30Days = 50
+   allTime = 50
 
-   VAŽNO:
-
-   - posts.json se učitava DIREKTNO sa Cloudflare-a
-   - NE TRAŽI lokalni posts.json
-   - koriste se SAMO ID-jevi koji postoje u posts.json
-   - EPIZODE SE NE PRIKAZUJU kao posebne stavke
-   - ako GA4 URL pripada seriji, pregled se pripisuje seriji
-   - ignorišu se stranice koje nisu serije
-   - duplikati se spajaju
-
-   FORMAT:
-
-   {
-       "today": [
-           {
-               "id": "ayse",
-               "views": 1520
-           }
-       ],
-
-       "last30Days": [
-           {
-               "id": "ayse",
-               "views": 24580
-           }
-       ],
-
-       "allTime": [
-           {
-               "id": "ayse",
-               "views": 135240
-           }
-       ]
-   }
+   posts.json DIREKTNO SA CLOUDFLARE-A
 
 ========================================================= */
+
 
 const fs = require("fs");
 const path = require("path");
 const https = require("https");
 
+
 const {
     BetaAnalyticsDataClient
 } = require("@google-analytics/data");
+
 
 const {
     GoogleAuth
 } = require("google-auth-library");
 
 
+
 /* =========================================================
    PODESAVANJA
 ========================================================= */
 
+
 const PROPERTY_ID = "549759235";
 
-/*
- * VAŽNO:
- *
- * Ne menjati na 10.
- *
- * Šaljemo 50 serija u svaku kategoriju
- * da frontend može da meša rezultate.
- */
+
 const TOP_LIMIT = 50;
+
 
 const POSTS_URL =
     "https://nadlanu.online/posts.json";
+
 
 const OUTPUT_FILE =
     path.join(
@@ -85,16 +51,21 @@ const OUTPUT_FILE =
         "popular.json"
     );
 
+
 const TIME_ZONE =
     "Europe/Belgrade";
+
 
 const ALL_TIME_START_DATE =
     "2020-01-01";
 
 
+
+
 /* =========================================================
    LOG
 ========================================================= */
+
 
 function separator() {
 
@@ -103,6 +74,7 @@ function separator() {
     );
 
 }
+
 
 
 function section(title) {
@@ -118,11 +90,16 @@ function section(title) {
 }
 
 
+
+
+
 /* =========================================================
    MASK EMAIL
 ========================================================= */
 
+
 function maskEmail(email) {
+
 
     if (!email) {
 
@@ -130,11 +107,14 @@ function maskEmail(email) {
 
     }
 
+
     const value =
         String(email);
 
+
     const parts =
         value.split("@");
+
 
     if (
         parts.length !== 2
@@ -144,11 +124,14 @@ function maskEmail(email) {
 
     }
 
+
     const name =
         parts[0];
 
+
     const domain =
         parts[1];
+
 
     if (
         name.length <= 2
@@ -158,28 +141,36 @@ function maskEmail(email) {
 
     }
 
+
     return (
-        name.substring(0, 2) +
+        name.substring(0,2) +
         "***@" +
         domain
     );
 
+
 }
 
 
+
+
+
 /* =========================================================
-   UCITAVANJE POSTS.JSON SA CLOUDFLARE-A
+   UCITAVANJE posts.json SA CLOUDFLARE-A
 ========================================================= */
+
 
 function loadPostsFromCloudflare() {
 
+
     return new Promise(
-        function(resolve, reject) {
+        function(resolve,reject){
+
 
             console.log("");
 
             console.log(
-                "URL:"
+                "Ucitavam:"
             );
 
             console.log(
@@ -187,12 +178,16 @@ function loadPostsFromCloudflare() {
             );
 
 
+
             const request =
                 https.get(
                     POSTS_URL,
-                    function(response) {
+                    function(response){
+
+
 
                         let body = "";
+
 
 
                         response.setEncoding(
@@ -200,9 +195,10 @@ function loadPostsFromCloudflare() {
                         );
 
 
+
                         response.on(
                             "data",
-                            function(chunk) {
+                            function(chunk){
 
                                 body += chunk;
 
@@ -210,23 +206,26 @@ function loadPostsFromCloudflare() {
                         );
 
 
+
                         response.on(
                             "end",
-                            function() {
+                            function(){
+
 
                                 console.log(
-                                    "HTTP status:",
+                                    "HTTP:",
                                     response.statusCode
                                 );
 
 
-                                if (
+
+                                if(
                                     response.statusCode !== 200
-                                ) {
+                                ){
 
                                     reject(
                                         new Error(
-                                            "Cloudflare nije vratio HTTP 200. Status: " +
+                                            "Cloudflare HTTP greska: " +
                                             response.statusCode
                                         )
                                     );
@@ -236,107 +235,118 @@ function loadPostsFromCloudflare() {
                                 }
 
 
+
                                 try {
 
-                                    const data =
+
+                                    const json =
                                         JSON.parse(
                                             body
                                         );
 
 
-                                    if (
-                                        !Array.isArray(
-                                            data
-                                        )
-                                    ) {
 
-                                        reject(
-                                            new Error(
-                                                "posts.json nije niz."
-                                            )
+                                    if(
+                                        !Array.isArray(json)
+                                    ){
+
+                                        throw new Error(
+                                            "posts.json nije niz"
                                         );
-
-                                        return;
 
                                     }
 
 
-                                    console.log(
-                                        "✅ posts.json uspesno ucitan."
-                                    );
-
 
                                     console.log(
-                                        "Ukupno serija:",
-                                        data.length
+                                        "✅ posts.json ucitan"
                                     );
 
 
-                                    resolve(
-                                        data
+                                    console.log(
+                                        "Broj stavki:",
+                                        json.length
                                     );
 
 
-                                } catch (error) {
+
+                                    resolve(json);
+
+
+
+                                }
+                                catch(error){
+
 
                                     reject(
                                         new Error(
-                                            "posts.json nije validan JSON: " +
+                                            "JSON greska: " +
                                             error.message
                                         )
                                     );
 
+
                                 }
+
+
 
                             }
                         );
+
 
 
                     }
                 );
 
 
+
             request.on(
                 "error",
-                function(error) {
+                function(error){
 
-                    reject(
-                        new Error(
-                            "Greska pri povezivanju sa Cloudflare-om: " +
-                            error.message
-                        )
-                    );
+                    reject(error);
 
                 }
             );
 
+
+
         }
     );
+
 
 }
 
 
+
+
+
 /* =========================================================
-   KREIRAJ MAPU SERIJA
+   KREIRANJE MAPE SERIJA
 ========================================================= */
 
-function createSeriesMap(posts) {
 
-    const seriesMap =
+function createSeriesMap(posts){
+
+
+    const map =
         new Map();
 
 
-    posts.forEach(
-        function(item) {
 
-            if (
+    posts.forEach(
+        function(item){
+
+
+            if(
                 !item ||
                 typeof item !== "object"
-            ) {
+            ){
 
                 return;
 
             }
+
 
 
             const id =
@@ -347,19 +357,20 @@ function createSeriesMap(posts) {
                 .toLowerCase();
 
 
-            if (!id) {
+
+            if(!id){
 
                 return;
 
             }
 
 
-            seriesMap.set(
+
+            map.set(
                 id,
                 {
 
-                    id:
-                        id,
+                    id:id,
 
                     title:
                         String(
@@ -369,110 +380,104 @@ function createSeriesMap(posts) {
                 }
             );
 
+
+
         }
     );
+
 
 
     console.log("");
 
     console.log(
-        "Kreirana lista dozvoljenih serija:"
-    );
-
-    console.log(
-        seriesMap.size
+        "Dozvoljene serije:",
+        map.size
     );
 
 
-    return seriesMap;
+
+    return map;
+
 
 }
 
 
+
+
+
 /* =========================================================
-   CREDENTIALS
+   GOOGLE CREDENTIALS
 ========================================================= */
 
-function getCredentials() {
+
+function getCredentials(){
+
 
     section(
-        "1. GOOGLE SERVICE ACCOUNT"
+        "GOOGLE SERVICE ACCOUNT"
     );
+
 
 
     const json =
         process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
 
 
-    if (!json) {
+
+    if(!json){
+
 
         throw new Error(
-            "Nedostaje GOOGLE_SERVICE_ACCOUNT_JSON secret."
+            "Nedostaje GOOGLE_SERVICE_ACCOUNT_JSON"
         );
+
 
     }
 
-
-    console.log(
-        "✅ GOOGLE_SERVICE_ACCOUNT_JSON postoji."
-    );
-
-
-    console.log(
-        "Duzina:",
-        json.length,
-        "karaktera"
-    );
 
 
     let credentials;
 
 
+
     try {
+
 
         credentials =
             JSON.parse(
                 json
             );
 
-    } catch (error) {
+
+    }
+    catch(error){
+
 
         throw new Error(
-            "GOOGLE_SERVICE_ACCOUNT_JSON nije validan JSON."
+            "Service account JSON nije validan"
         );
+
 
     }
 
 
-    console.log(
-        "✅ JSON je validan."
-    );
 
 
-    if (
-        !credentials.client_email
-    ) {
-
-        throw new Error(
-            "client_email ne postoji."
-        );
-
-    }
-
-
-    if (
+    if(
+        !credentials.client_email ||
         !credentials.private_key
-    ) {
+    ){
 
         throw new Error(
-            "private_key ne postoji."
+            "Nedostaje client_email ili private_key"
         );
 
     }
 
 
+
     console.log(
-        "client_email:",
+        "Email:",
         maskEmail(
             credentials.client_email
         )
@@ -480,453 +485,223 @@ function getCredentials() {
 
 
     console.log(
-        "private_key postoji: DA"
+        "Private key OK"
     );
 
-
-    const privateKey =
-        String(
-            credentials.private_key
-        );
-
-
-    if (
-        !privateKey.includes(
-            "BEGIN PRIVATE KEY"
-        )
-    ) {
-
-        throw new Error(
-            "private_key nema BEGIN PRIVATE KEY."
-        );
-
-    }
-
-
-    if (
-        !privateKey.includes(
-            "END PRIVATE KEY"
-        )
-    ) {
-
-        throw new Error(
-            "private_key nema END PRIVATE KEY."
-        );
-
-    }
-
-
-    console.log(
-        "✅ Private key PEM format OK."
-    );
 
 
     return credentials;
 
+
 }
+
+
+
 
 
 /* =========================================================
    GOOGLE AUTH
 ========================================================= */
 
-function createGoogleAuth(
-    credentials
-) {
 
-    section(
-        "2. GOOGLE AUTH"
+function createGoogleAuth(credentials){
+
+
+
+    const auth =
+        new GoogleAuth({
+
+
+            credentials:{
+
+
+                client_email:
+                    credentials.client_email,
+
+
+                private_key:
+                    credentials.private_key
+
+
+            },
+
+
+            scopes:[
+
+
+                "https://www.googleapis.com/auth/analytics.readonly"
+
+
+            ]
+
+
+        });
+
+
+
+    console.log(
+        "✅ Google Auth OK"
     );
 
 
-    try {
 
-        const auth =
-            new GoogleAuth({
+    return auth;
 
-                credentials: {
-
-                    client_email:
-                        credentials.client_email,
-
-                    private_key:
-                        credentials.private_key
-
-                },
-
-                scopes: [
-
-                    "https://www.googleapis.com/auth/analytics.readonly"
-
-                ]
-
-            });
-
-
-        console.log(
-            "✅ GoogleAuth napravljen."
-        );
-
-
-        return auth;
-
-
-    } catch (error) {
-
-        throw new Error(
-            "GoogleAuth greska: " +
-            error.message
-        );
-
-    }
 
 }
 
 
-/* =========================================================
-   OAUTH TOKEN
-========================================================= */
 
-async function testGoogleAuthentication(
-    auth
-) {
-
-    section(
-        "3. GOOGLE OAUTH TOKEN"
-    );
-
-
-    try {
-
-        const client =
-            await auth.getClient();
-
-
-        if (!client) {
-
-            throw new Error(
-                "Google Auth client nije napravljen."
-            );
-
-        }
-
-
-        const tokenResponse =
-            await client.getAccessToken();
-
-
-        if (
-            !tokenResponse ||
-            !tokenResponse.token
-        ) {
-
-            throw new Error(
-                "OAuth token nije dobijen."
-            );
-
-        }
-
-
-        console.log(
-            "✅ OAuth token uspesno dobijen."
-        );
-
-
-        return client;
-
-
-    } catch (error) {
-
-        console.error(
-            "OAuth greska:",
-            error.message
-        );
-
-
-        throw error;
-
-    }
-
-}
 
 
 /* =========================================================
    GA4 CLIENT
 ========================================================= */
 
-function createAnalyticsClient(
-    credentials
-) {
 
-    section(
-        "4. GA4 DATA API CLIENT"
+function createAnalyticsClient(credentials){
+
+
+
+    const client =
+        new BetaAnalyticsDataClient({
+
+
+            credentials:{
+
+
+                client_email:
+                    credentials.client_email,
+
+
+                private_key:
+                    credentials.private_key
+
+
+            }
+
+
+        });
+
+
+
+    console.log(
+        "✅ GA4 Client OK"
     );
 
 
-    try {
+    return client;
 
-        const client =
-            new BetaAnalyticsDataClient({
-
-                credentials: {
-
-                    client_email:
-                        credentials.client_email,
-
-                    private_key:
-                        credentials.private_key
-
-                }
-
-            });
-
-
-        console.log(
-            "✅ GA4 client napravljen."
-        );
-
-
-        console.log(
-            "Property:",
-            PROPERTY_ID
-        );
-
-
-        return client;
-
-
-    } catch (error) {
-
-        throw new Error(
-            "GA4 client greska: " +
-            error.message
-        );
-
-    }
 
 }
 
-
 /* =========================================================
-   TEST GA4 PROPERTY
+   NORMALIZACIJA URL-A
 ========================================================= */
 
-async function testGA4Property(
-    analyticsDataClient
-) {
 
-    section(
-        "5. PROVERA GA4 PROPERTY"
-    );
+function normalizePath(value){
 
 
-    try {
-
-        const [
-            response
-        ] =
-            await analyticsDataClient.runReport({
-
-                property:
-                    `properties/${PROPERTY_ID}`,
-
-                dateRanges: [
-
-                    {
-
-                        startDate:
-                            "7daysAgo",
-
-                        endDate:
-                            "yesterday"
-
-                    }
-
-                ],
-
-                dimensions: [
-
-                    {
-                        name:
-                            "pagePathPlusQueryString"
-                    }
-
-                ],
-
-                metrics: [
-
-                    {
-                        name:
-                            "screenPageViews"
-                    }
-
-                ],
-
-                limit:
-                    1
-
-            });
-
-
-        console.log(
-            "✅ GA4 Property pristup OK."
-        );
-
-
-        console.log(
-            "Test redova:",
-            (
-                response.rows || []
-            ).length
-        );
-
-
-        return true;
-
-
-    } catch (error) {
-
-        console.error(
-            "❌ GA4 Property greska."
-        );
-
-
-        console.error(
-            "Code:",
-            error.code
-        );
-
-
-        console.error(
-            "Message:",
-            error.message
-        );
-
-
-        throw error;
-
-    }
-
-}
-
-
-/* =========================================================
-   NORMALIZUJ URL
-========================================================= */
-
-function normalizePath(
-    pagePath
-) {
-
-    if (!pagePath) {
+    if(!value){
 
         return "";
 
     }
 
 
-    let value =
-        String(
-            pagePath
-        )
+
+    let url =
+        String(value)
         .trim();
 
 
-    try {
 
-        if (
-            value.startsWith(
-                "http://"
-            ) ||
-            value.startsWith(
-                "https://"
-            )
-        ) {
-
-            const url =
-                new URL(
-                    value
-                );
+    try{
 
 
-            value =
-                url.pathname +
-                url.search;
+        if(
+            url.startsWith("http://") ||
+            url.startsWith("https://")
+        ){
+
+            const u =
+                new URL(url);
+
+
+            url =
+                u.pathname +
+                u.search;
 
         }
 
-    } catch (error) {
-
-        // Nastavljamo.
 
     }
+    catch(e){}
 
 
-    const hashIndex =
-        value.indexOf("#");
+
+    const hash =
+        url.indexOf("#");
 
 
-    if (
-        hashIndex !== -1
-    ) {
+    if(hash !== -1){
 
-        value =
-            value.substring(
+        url =
+            url.substring(
                 0,
-                hashIndex
+                hash
             );
 
     }
 
 
-    value =
-        value.replace(
-            /^\/+/,
-            ""
-        );
 
+    return url.replace(
+        /^\/+/,
+        ""
+    );
 
-    return value;
 
 }
 
 
+
+
+
+
+
 /* =========================================================
-   IZVADI ID IZ QUERY STRINGA
+   ID IZ QUERY PARAMETRA
 ========================================================= */
 
-function getIdFromQuery(
-    value
-) {
 
-    try {
+function getIdFromQuery(value){
 
-        const questionIndex =
+
+    try{
+
+
+        const index =
             value.indexOf("?");
 
 
-        if (
-            questionIndex === -1
-        ) {
+        if(index === -1){
 
             return "";
 
         }
 
 
-        const query =
-            value.substring(
-                questionIndex + 1
-            );
-
 
         const params =
             new URLSearchParams(
-                query
+                value.substring(index+1)
             );
 
 
-        const possibleKeys = [
+
+        const keys = [
 
             "id",
             "series",
@@ -938,307 +713,157 @@ function getIdFromQuery(
         ];
 
 
-        for (
-            const key
-            of possibleKeys
-        ) {
 
-            const found =
-                params.get(
-                    key
-                );
+        for(
+            const key of keys
+        ){
 
 
-            if (found) {
+            const result =
+                params.get(key);
 
-                return String(
-                    found
-                )
-                .trim()
-                .toLowerCase();
+
+
+            if(result){
+
+                return String(result)
+                    .trim()
+                    .toLowerCase();
 
             }
 
+
         }
 
-    } catch (error) {
 
-        return "";
 
     }
+    catch(e){}
+
 
 
     return "";
 
-}
-
-
-/* =========================================================
-   DA LI JE EPIZODA
-========================================================= */
-
-function looksLikeEpisode(
-    value
-) {
-
-    const text =
-        String(
-            value || ""
-        )
-        .toLowerCase();
-
-
-    const patterns = [
-
-        /(^|\/)epizoda[-_ ]?\d+/i,
-
-        /(^|\/)episode[-_ ]?\d+/i,
-
-        /(^|\/)ep[-_ ]?\d+/i,
-
-        /(^|\/)e[-_ ]?\d+/i,
-
-        /(^|\/)season[-_ ]?\d+/i,
-
-        /(^|\/)sezona[-_ ]?\d+/i,
-
-        /(^|\/)s\d+e\d+/i
-
-    ];
-
-
-    for (
-        const pattern
-        of patterns
-    ) {
-
-        if (
-            pattern.test(
-                text
-            )
-        ) {
-
-            return true;
-
-        }
-
-    }
-
-
-    return false;
 
 }
 
 
+
+
+
+
+
 /* =========================================================
-   PRONADJI SERIJU U GA4 PUTANJI
+   PRONALAZENJE SERIJE IZ GA4 URL-a
 ========================================================= */
 
-function findSeriesId(
-    pagePath,
-    seriesMap
-) {
 
-    if (!pagePath) {
+function findSeriesId(pagePath,seriesMap){
+
+
+
+    if(!pagePath){
 
         return null;
 
     }
 
 
-    const original =
-        String(
-            pagePath
-        )
-        .trim();
-
-
-    if (!original) {
-
-        return null;
-
-    }
-
-
-    /*
-     * 1. QUERY PARAMETAR
-     */
 
     const queryId =
         getIdFromQuery(
-            original
+            pagePath
         );
 
 
-    if (
+
+    if(
         queryId &&
-        seriesMap.has(
-            queryId
-        )
-    ) {
+        seriesMap.has(queryId)
+    ){
 
         return queryId;
 
     }
 
 
-    /*
-     * 2. NORMALIZOVANA PUTANJA
-     */
+
 
     const normalized =
         normalizePath(
-            original
+            pagePath
         );
 
 
-    if (!normalized) {
 
-        return null;
-
-    }
-
-
-    const pathOnly =
-        normalized.split(
-            "?"
-        )[0];
+    const clean =
+        normalized
+        .split("?")[0];
 
 
-    /*
-     * Ako je epizoda,
-     * pokušavamo samo da pronađemo
-     * seriju kroz ostale segmente.
-     */
 
-    const segments =
-        pathOnly
-            .split("/")
-            .filter(
-                Boolean
-            );
+    const parts =
+        clean
+        .split("/")
+        .filter(Boolean);
 
 
-    if (!segments.length) {
-
-        return null;
-
-    }
 
 
-    /*
-     * 3. TAČNO POKLAPANJE SEGMENTA
-     */
-
-    for (
-        const segment
-        of segments
-    ) {
-
-        let cleanSegment;
+    for(
+        const part of parts
+    ){
 
 
-        try {
-
-            cleanSegment =
-                decodeURIComponent(
-                    segment
-                );
-
-        } catch (error) {
-
-            cleanSegment =
-                segment;
-
-        }
-
-
-        cleanSegment =
-            String(
-                cleanSegment
+        let id =
+            decodeURIComponent(
+                part
             )
-            .trim()
             .toLowerCase()
             .replace(
-                /\.html$/i,
+                ".html",
                 ""
-            );
-
-
-        if (
-            seriesMap.has(
-                cleanSegment
             )
-        ) {
+            .trim();
 
-            return cleanSegment;
+
+
+        if(
+            seriesMap.has(id)
+        ){
+
+            return id;
 
         }
 
-    }
-
-
-    /*
-     * 4. POSLEDNJI SEGMENT
-     */
-
-    let last =
-        segments[
-            segments.length - 1
-        ];
-
-
-    try {
-
-        last =
-            decodeURIComponent(
-                last
-            );
-
-    } catch (error) {
-
-        // Nastavljamo.
 
     }
 
 
-    last =
-        String(
-            last
-        )
-        .trim()
-        .toLowerCase()
-        .replace(
-            /\.html$/i,
-            ""
-        );
-
-
-    if (
-        seriesMap.has(
-            last
-        )
-    ) {
-
-        return last;
-
-    }
 
 
     return null;
 
+
 }
+
+
+
+
+
+
 
 
 /* =========================================================
    GA4 PERIOD
 ========================================================= */
 
+
 async function getPeriodData(
 
     analyticsDataClient,
 
-    nazivPerioda,
+    periodName,
 
     startDate,
 
@@ -1246,535 +871,288 @@ async function getPeriodData(
 
     seriesMap
 
-) {
+){
+
+
 
     console.log("");
 
     console.log(
-        "------------------------------------------"
+        "=========================================="
     );
 
     console.log(
-        nazivPerioda
-    );
-
-    console.log(
-        "Period:",
+        periodName,
         startDate,
-        "→",
+        "->",
         endDate
     );
 
     console.log(
-        "------------------------------------------"
+        "=========================================="
     );
 
 
-    try {
 
-        const [
-            response
-        ] =
-            await analyticsDataClient.runReport({
+    const [
+        response
+    ] =
+    await analyticsDataClient.runReport({
 
-                property:
-                    `properties/${PROPERTY_ID}`,
 
-                dateRanges: [
 
-                    {
+        property:
+            `properties/${PROPERTY_ID}`,
 
-                        startDate:
-                            startDate,
 
-                        endDate:
-                            endDate
 
-                    }
+        dateRanges:[
 
-                ],
 
-                dimensions: [
+            {
 
-                    {
-                        name:
-                            "pagePathPlusQueryString"
-                    }
+                startDate:startDate,
 
-                ],
+                endDate:endDate
 
-                metrics: [
+            }
 
-                    {
-                        name:
-                            "screenPageViews"
-                    }
 
-                ],
+        ],
 
-                orderBys: [
 
-                    {
 
-                        metric: {
+        dimensions:[
 
-                            metricName:
-                                "screenPageViews",
 
-                            order:
-                                "DESCENDING"
+            {
 
-                        }
+                name:
+                    "pagePathPlusQueryString"
 
-                    }
+            }
 
-                ],
 
-                /*
-                 * Ne ograničavamo na 50.
-                 *
-                 * GA4 treba da vrati dovoljno redova
-                 * da bismo mogli da skupimo 50 SERIJA.
-                 */
-                limit:
-                    100000
+        ],
+
+
+
+        metrics:[
+
+
+            {
+
+                name:
+                    "screenPageViews"
+
+            }
+
+
+        ],
+
+
+
+        orderBys:[
+
+
+            {
+
+                metric:{
+
+
+                    metricName:
+                        "screenPageViews",
+
+
+                    order:
+                        "DESCENDING"
+
+
+                }
+
+
+            }
+
+
+        ],
+
+
+
+        limit:
+            100000
+
+
+
+    });
+
+
+
+
+    const rows =
+        response.rows || [];
+
+
+
+    console.log(
+        "GA4 redova:",
+        rows.length
+    );
+
+
+
+    const totals =
+        new Map();
+
+
+
+
+    rows.forEach(
+        function(row){
+
+
+
+            const path =
+                row
+                .dimensionValues[0]
+                .value;
+
+
+
+            const views =
+                Number(
+                    row
+                    .metricValues[0]
+                    .value
+                );
+
+
+
+            const id =
+                findSeriesId(
+                    path,
+                    seriesMap
+                );
+
+
+
+            if(!id){
+
+                return;
+
+            }
+
+
+
+            const old =
+                totals.get(id) || 0;
+
+
+
+            totals.set(
+                id,
+                old + views
+            );
+
+
+
+        }
+    );
+
+
+
+
+
+    const result = [];
+
+
+
+    totals.forEach(
+        function(views,id){
+
+
+            result.push({
+
+                id:id,
+
+                views:Number(views)
 
             });
 
 
-        const rows =
-            response.rows || [];
-
-
-        console.log(
-            "GA4 redova:",
-            rows.length
-        );
-
-
-        const totals =
-            new Map();
-
-
-        let matchedRows =
-            0;
-
-        let ignoredRows =
-            0;
-
-        let totalViews =
-            0;
-
-
-        console.log("");
-
-        console.log(
-            "GA4 PAGE PATH PODACI:"
-        );
-
-        console.log(
-            "------------------------------------------"
-        );
-
-
-        rows
-            .slice(
-                0,
-                50
-            )
-            .forEach(
-                function(row, index) {
-
-                    const pagePath =
-                        row
-                            .dimensionValues?.[0]
-                            ?.value || "";
-
-
-                    const views =
-                        Number(
-                            row
-                                .metricValues?.[0]
-                                ?.value || 0
-                        );
-
-
-                    console.log(
-                        `${index + 1}. ${pagePath} → ${views}`
-                    );
-
-                }
-            );
-
-
-        console.log(
-            "------------------------------------------"
-        );
-
-
-        rows.forEach(
-            function(row) {
-
-                const pagePath =
-                    row
-                        .dimensionValues?.[0]
-                        ?.value || "";
-
-
-                const views =
-                    Number(
-                        row
-                            .metricValues?.[0]
-                            ?.value || 0
-                    );
-
-
-                if (
-                    !pagePath ||
-                    views <= 0
-                ) {
-
-                    ignoredRows++;
-
-                    return;
-
-                }
-
-
-                totalViews +=
-                    views;
-
-
-                const seriesId =
-                    findSeriesId(
-                        pagePath,
-                        seriesMap
-                    );
-
-
-                if (!seriesId) {
-
-                    ignoredRows++;
-
-                    return;
-
-                }
-
-
-                matchedRows++;
-
-
-                const old =
-                    totals.get(
-                        seriesId
-                    ) || 0;
-
-
-                totals.set(
-                    seriesId,
-                    old + views
-                );
-
-            }
-        );
-
-
-        const result = [];
-
-
-        totals.forEach(
-            function(views, id) {
-
-                if (
-                    views <= 0
-                ) {
-
-                    return;
-
-                }
-
-
-                result.push({
-
-                    id:
-                        id,
-
-                    views:
-                        Number(
-                            views
-                        )
-
-                });
-
-            }
-        );
-
-
-        /*
-         * Najgledanije prvo.
-         */
-
-        result.sort(
-            function(a, b) {
-
-                return (
-                    Number(
-                        b.views
-                    )
-                    -
-                    Number(
-                        a.views
-                    )
-                );
-
-            }
-        );
-
-
-        console.log("");
-
-        console.log(
-            "REZULTAT PERIODA:"
-        );
-
-        console.log(
-            "Ukupno GA4 pregleda:",
-            totalViews
-        );
-
-        console.log(
-            "Prepoznatih redova:",
-            matchedRows
-        );
-
-        console.log(
-            "Ignorisanih redova:",
-            ignoredRows
-        );
-
-        console.log(
-            "Pronadjenih serija:",
-            result.length
-        );
-
-
-        console.log("");
-
-        console.log(
-            `TOP ${TOP_LIMIT} SERIJA:`
-        );
-
-        console.log(
-            "------------------------------------------"
-        );
-
-
-        result
-            .slice(
-                0,
-                TOP_LIMIT
-            )
-            .forEach(
-                function(item, index) {
-
-                    const series =
-                        seriesMap.get(
-                            item.id
-                        );
-
-
-                    const title =
-                        series
-                            ? series.title
-                            : "";
-
-
-                    console.log(
-                        `${index + 1}. ${item.id} | ${title} | ${item.views} pregleda`
-                    );
-
-                }
-            );
-
-
-        console.log(
-            "------------------------------------------"
-        );
-
-
-        return result;
-
-
-    } catch (error) {
-
-        console.error("");
-
-        console.error(
-            "❌ Greska perioda:",
-            nazivPerioda
-        );
-
-
-        console.error(
-            "Code:",
-            error.code || "n/a"
-        );
-
-
-        console.error(
-            "Message:",
-            error.message || "n/a"
-        );
-
-
-        if (
-            error.details
-        ) {
-
-            console.error(
-                "Details:",
-                error.details
-            );
-
         }
+    );
 
 
-        throw error;
-
-    }
-
-}
 
 
-/* =========================================================
-   TOP LISTA
-========================================================= */
+    result.sort(
+        function(a,b){
 
-function getTop(
-    data
-) {
-
-    if (
-        !Array.isArray(
-            data
-        )
-    ) {
-
-        return [];
-
-    }
-
-
-    const copy =
-        data.slice();
-
-
-    copy.sort(
-        function(a, b) {
-
-            return (
-                Number(
-                    b.views || 0
-                )
-                -
-                Number(
-                    a.views || 0
-                )
-            );
+            return b.views - a.views;
 
         }
     );
 
 
-    /*
-     * OVDE JE 50.
-     */
 
-    return copy.slice(
-        0,
-        TOP_LIMIT
-    );
-
-}
-
-
-/* =========================================================
-   PRINT TOP
-========================================================= */
-
-function printTop(
-    title,
-    data,
-    seriesMap
-) {
-
-    console.log("");
 
     console.log(
-        title
+        "Pronadjeno serija:",
+        result.length
     );
 
 
-    if (
-        !Array.isArray(data) ||
-        !data.length
-    ) {
 
-        console.log(
-            "Nema podataka."
-        );
-
-        return;
-
-    }
+    return result;
 
 
-    data.forEach(
-        function(item, index) {
-
-            const series =
-                seriesMap.get(
-                    item.id
-                );
-
-
-            const titleText =
-                series
-                    ? series.title
-                    : "";
-
-
-            console.log(
-                `${index + 1}. ${item.id} - ${titleText} - ${item.views} pregleda`
-            );
-
-        }
-    );
 
 }
 
-
 /* =========================================================
-   FORMAT JSON
+   TOP LIMIT
 ========================================================= */
 
-function formatList(
-    data
-) {
 
-    if (
-        !Array.isArray(
-            data
-        )
-    ) {
+function getTop(data){
+
+
+    if(!Array.isArray(data)){
 
         return [];
 
     }
+
+
+
+    return data
+        .sort(
+            (a,b)=>
+                b.views - a.views
+        )
+        .slice(
+            0,
+            TOP_LIMIT
+        );
+
+
+}
+
+
+
+
+
+/* =========================================================
+   FORMAT ZA JSON
+========================================================= */
+
+
+function formatList(data){
 
 
     return data.map(
-        function(item) {
+        function(item){
+
 
             return {
 
@@ -1783,46 +1161,38 @@ function formatList(
                         item.id
                     ),
 
+
                 views:
                     Number(
-                        item.views || 0
+                        item.views
                     )
 
+
             };
+
 
         }
     );
 
+
 }
+
+
+
+
+
 
 
 /* =========================================================
    VALIDACIJA
 ========================================================= */
 
-function validatePopularJSON(
-    data,
-    seriesMap
-) {
 
-    section(
-        "9. VALIDACIJA popular.json"
-    );
+function validatePopularJSON(data,seriesMap){
 
 
-    if (
-        !data ||
-        typeof data !== "object"
-    ) {
 
-        throw new Error(
-            "popular.json nije objekat."
-        );
-
-    }
-
-
-    const categories = [
+    const keys = [
 
         "today",
         "last30Days",
@@ -1831,177 +1201,127 @@ function validatePopularJSON(
     ];
 
 
-    categories.forEach(
-        function(category) {
 
-            if (
+    keys.forEach(
+        function(key){
+
+
+            if(
                 !Array.isArray(
-                    data[category]
+                    data[key]
                 )
-            ) {
+            ){
 
                 throw new Error(
-                    `${category} nije validan niz.`
+                    key +
+                    " nije niz"
                 );
 
             }
 
 
-            /*
-             * OVDE JE KLJUČNA IZMENA.
-             *
-             * Više nije 10.
-             * Sada je 50.
-             */
 
-            if (
-                data[category].length >
-                TOP_LIMIT
-            ) {
+            if(
+                data[key].length > TOP_LIMIT
+            ){
 
                 throw new Error(
-                    `${category} ima vise od ${TOP_LIMIT} elemenata.`
+                    key +
+                    " ima vise od 50"
                 );
 
             }
 
 
-            data[category].forEach(
-                function(item) {
-
-                    if (
-                        !item ||
-                        !item.id
-                    ) {
-
-                        throw new Error(
-                            `${category} ima element bez id.`
-                        );
-
-                    }
 
 
-                    if (
-                        typeof item.views !==
-                        "number"
-                    ) {
-
-                        throw new Error(
-                            `${category} ${item.id} nema validan views.`
-                        );
-
-                    }
+            data[key].forEach(
+                function(item){
 
 
-                    /*
-                     * ID mora postojati u posts.json.
-                     */
-
-                    if (
+                    if(
                         !seriesMap.has(
-                            String(
-                                item.id
-                            )
-                            .trim()
-                            .toLowerCase()
+                            item.id
                         )
-                    ) {
+                    ){
 
                         throw new Error(
-                            `${category} sadrzi ID koji ne postoji u posts.json: ${item.id}`
+                            "ID ne postoji u posts.json: "
+                            + item.id
                         );
 
                     }
+
+
 
                 }
             );
+
+
 
         }
     );
 
 
-    console.log(
-        "✅ today:",
-        data.today.length
-    );
-
 
     console.log(
-        "✅ last30Days:",
-        data.last30Days.length
+        "✅ popular.json validan"
     );
 
-
-    console.log(
-        "✅ allTime:",
-        data.allTime.length
-    );
-
-
-    console.log(
-        "✅ Limit:",
-        TOP_LIMIT
-    );
-
-
-    console.log(
-        "✅ popular.json validan."
-    );
-
-
-    return true;
 
 }
 
 
+
+
+
 /* =========================================================
-   NAPRAVI JSON
+   KREIRANJE popular.json
 ========================================================= */
+
 
 function createPopularJSON(
 
-    popularnoDanas,
+    today,
 
-    popularno30Dana,
+    last30,
 
-    popularnoOduvek,
+    allTime,
 
     seriesMap
 
-) {
-
-    section(
-        "8. PRAVLJENJE popular.json"
-    );
+){
 
 
-    const output = {
 
-        /*
-         * TOP 50
-         */
+    const json = {
+
+
         today:
             formatList(
-                popularnoDanas
+                getTop(today)
             ),
 
-        /*
-         * TOP 50
-         */
+
+
         last30Days:
             formatList(
-                popularno30Dana
+                getTop(last30)
             ),
 
-        /*
-         * TOP 50
-         */
+
+
         allTime:
             formatList(
-                popularnoOduvek
+                getTop(allTime)
             )
 
+
+
     };
+
+
+
 
 
     fs.writeFileSync(
@@ -2009,7 +1329,7 @@ function createPopularJSON(
         OUTPUT_FILE,
 
         JSON.stringify(
-            output,
+            json,
             null,
             4
         ),
@@ -2019,10 +1339,17 @@ function createPopularJSON(
     );
 
 
+
+
+    console.log("");
+
     console.log(
-        "✅ popular.json napravljen."
+        "=========================================="
     );
 
+    console.log(
+        "✅ popular.json napravljen"
+    );
 
     console.log(
         "Lokacija:",
@@ -2031,515 +1358,250 @@ function createPopularJSON(
 
 
     console.log(
-        "Broj za today:",
-        output.today.length
+        "Today:",
+        json.today.length
     );
 
 
     console.log(
-        "Broj za last30Days:",
-        output.last30Days.length
+        "Last30:",
+        json.last30Days.length
     );
 
 
     console.log(
-        "Broj za allTime:",
-        output.allTime.length
+        "AllTime:",
+        json.allTime.length
     );
 
-
-    printTop(
-        "TOP 50 - TODAY",
-        output.today,
-        seriesMap
-    );
-
-
-    printTop(
-        "TOP 50 - LAST 30 DAYS",
-        output.last30Days,
-        seriesMap
-    );
-
-
-    printTop(
-        "TOP 50 - ALL TIME",
-        output.allTime,
-        seriesMap
-    );
 
 
     validatePopularJSON(
-        output,
+        json,
         seriesMap
     );
 
 
-    return output;
+
+    return json;
+
 
 }
 
 
+
+
+
+
+
 /* =========================================================
-   GLAVNA FUNKCIJA
+   GLAVNI START
 ========================================================= */
 
-async function createPopularJSONProcess() {
+
+async function start(){
+
+
+
+try {
+
+
 
     section(
-        "SVE NA DLANU - GA4 POPULARNO"
+        "SVE NA DLANU - POPULAR.JS"
     );
 
 
-    console.log(
-        "Property:",
-        PROPERTY_ID
-    );
 
 
-    console.log(
-        "TOP LIMIT:",
-        TOP_LIMIT
-    );
+    /*
+       1. POSTS.JSON
+    */
 
 
-    console.log(
-        "Timezone:",
-        TIME_ZONE
-    );
+    const posts =
+        await loadPostsFromCloudflare();
 
 
-    console.log(
-        "Posts URL:",
-        POSTS_URL
-    );
 
 
-    console.log("");
-
-    console.log(
-        "=========================================="
-    );
-
-    console.log(
-        `POPULAR.JS CE PRAVITI TOP ${TOP_LIMIT}`
-    );
-
-    console.log(
-        "=========================================="
-    );
-
-
-    try {
-
-        /* =================================================
-           1. POSTS.JSON SA CLOUDFLARE-A
-        ================================================= */
-
-        section(
-            "1. UCITAVANJE posts.json"
+    const seriesMap =
+        createSeriesMap(
+            posts
         );
 
 
-        const posts =
-            await loadPostsFromCloudflare();
 
 
-        if (
-            !posts.length
-        ) {
-
-            throw new Error(
-                "posts.json je prazan."
-            );
-
-        }
+    /*
+       2. GOOGLE
+    */
 
 
-        const seriesMap =
-            createSeriesMap(
-                posts
-            );
+    const credentials =
+        getCredentials();
 
 
-        if (
-            seriesMap.size === 0
-        ) {
-
-            throw new Error(
-                "Nijedna validna serija nije pronadjena u posts.json."
-            );
-
-        }
 
 
-        /* =================================================
-           2. CREDENTIALS
-        ================================================= */
-
-        const credentials =
-            getCredentials();
-
-
-        /* =================================================
-           3. AUTH
-        ================================================= */
-
-        const auth =
-            createGoogleAuth(
-                credentials
-            );
-
-
-        /* =================================================
-           4. TOKEN
-        ================================================= */
-
-        await testGoogleAuthentication(
-            auth
+    const auth =
+        createGoogleAuth(
+            credentials
         );
 
 
-        /* =================================================
-           5. CLIENT
-        ================================================= */
-
-        const analyticsDataClient =
-            createAnalyticsClient(
-                credentials
-            );
 
 
-        /* =================================================
-           6. PROPERTY
-        ================================================= */
+    await auth.getClient();
 
-        await testGA4Property(
-            analyticsDataClient
+
+
+
+    const analytics =
+        createAnalyticsClient(
+            credentials
         );
 
 
-        /* =================================================
-   7A. TODAY
-================================================= */
-
-section(
-    "7A. TODAY"
-);
 
 
-let danas =
-    await getPeriodData(
 
-        analyticsDataClient,
 
-        "Danas",
+    /*
+       3. GA4
+    */
 
-        "1daysAgo",
 
-        "today",
+
+    const today =
+        await getPeriodData(
+
+            analytics,
+
+            "TODAY",
+
+            "1daysAgo",
+
+            "today",
+
+            seriesMap
+
+        );
+
+
+
+
+    const last30 =
+        await getPeriodData(
+
+            analytics,
+
+            "LAST 30 DAYS",
+
+            "30daysAgo",
+
+            "yesterday",
+
+            seriesMap
+
+        );
+
+
+
+
+    const allTime =
+        await getPeriodData(
+
+            analytics,
+
+            "ALL TIME",
+
+            ALL_TIME_START_DATE,
+
+            "today",
+
+            seriesMap
+
+        );
+
+
+
+
+
+
+    /*
+       4. JSON
+    */
+
+
+    createPopularJSON(
+
+        today,
+
+        last30,
+
+        allTime,
 
         seriesMap
 
     );
 
 
-/*
- * GA4 kasni sa obradom danasnjih podataka.
- * Ako nema rezultata, uzimamo juce.
- */
 
-if (
-    danas.length === 0
-) {
+
 
     console.log("");
 
     console.log(
-        "⚠️ Nema podataka za danas. Koristim juce."
+        "=========================================="
+    );
+
+    console.log(
+        "SVE USPESNO ZAVRSENO"
+    );
+
+    console.log(
+        "=========================================="
     );
 
 
-    danas =
-        await getPeriodData(
 
-            analyticsDataClient,
 
-            "Danas - fallback juce",
+}
+catch(error){
 
-            "yesterday",
 
-            "yesterday",
 
-            seriesMap
+    console.error("");
 
-        );
+    console.error(
+        "❌ GRESKA"
+    );
+
+
+    console.error(
+        error.message
+    );
+
+
+    process.exit(1);
+
+
 
 }
 
-        /* =================================================
-           7B. LAST 30 DAYS
-        ================================================= */
 
-        section(
-            "7B. LAST 30 DAYS"
-        );
-
-
-        const poslednjih30 =
-            await getPeriodData(
-
-                analyticsDataClient,
-
-                "Poslednjih 30 dana",
-
-                "30daysAgo",
-
-                "yesterday",
-
-                seriesMap
-
-            );
-
-
-        /* =================================================
-           7C. ALL TIME
-        ================================================= */
-
-        section(
-            "7C. ALL TIME"
-        );
-
-
-        const oduvek =
-            await getPeriodData(
-
-                analyticsDataClient,
-
-                "Sve vreme",
-
-                ALL_TIME_START_DATE,
-
-                "today",
-
-                seriesMap
-
-            );
-
-
-        /* =================================================
-           8. TOP 50
-        ================================================= */
-
-        section(
-            `8. OBRADA TOP ${TOP_LIMIT} LISTA`
-        );
-
-
-        const popularnoDanas =
-            getTop(
-                danas
-            );
-
-
-        const popularno30Dana =
-            getTop(
-                poslednjih30
-            );
-
-
-        const popularnoOduvek =
-            getTop(
-                oduvek
-            );
-
-
-        console.log(
-            "TODAY:",
-            popularnoDanas.length
-        );
-
-
-        console.log(
-            "LAST 30 DAYS:",
-            popularno30Dana.length
-        );
-
-
-        console.log(
-            "ALL TIME:",
-            popularnoOduvek.length
-        );
-
-
-        /* =================================================
-           9. JSON
-        ================================================= */
-
-        createPopularJSON(
-
-            popularnoDanas,
-
-            popularno30Dana,
-
-            popularnoOduvek,
-
-            seriesMap
-
-        );
-
-
-        /* =================================================
-           SUCCESS
-        ================================================= */
-
-        section(
-            "USPESNO ZAVRSENO"
-        );
-
-
-        console.log(
-            "✅ Cloudflare posts.json"
-        );
-
-
-        console.log(
-            "✅ Google Service Account"
-        );
-
-
-        console.log(
-            "✅ Google Auth"
-        );
-
-
-        console.log(
-            "✅ OAuth token"
-        );
-
-
-        console.log(
-            "✅ GA4 Data API"
-        );
-
-
-        console.log(
-            "✅ GA4 Property"
-        );
-
-
-        console.log(
-            "✅ Today TOP 50"
-        );
-
-
-        console.log(
-            "✅ Last 30 Days TOP 50"
-        );
-
-
-        console.log(
-            "✅ All Time TOP 50"
-        );
-
-
-        console.log(
-            "✅ Samo serije iz posts.json"
-        );
-
-
-        console.log(
-            "✅ Epizode nisu posebne stavke"
-        );
-
-
-        console.log(
-            "✅ Duplikati spojeni"
-        );
-
-
-        console.log(
-            "✅ popular.json"
-        );
-
-
-        console.log("");
-
-        console.log(
-            "=========================================="
-        );
-
-        console.log(
-            "SVE JE USPESNO ZAVRSENO"
-        );
-
-        console.log(
-            "=========================================="
-        );
-
-
-    } catch (error) {
-
-        section(
-            "GRESKA"
-        );
-
-
-        console.error(
-            "❌ popular.js NIJE USPESNO ZAVRSEN."
-        );
-
-
-        console.error(
-            "Code:",
-            error.code || "n/a"
-        );
-
-
-        console.error(
-            "Message:",
-            error.message || "n/a"
-        );
-
-
-        if (
-            error.details
-        ) {
-
-            console.error(
-                "Details:",
-                error.details
-            );
-
-        }
-
-
-        console.error("");
-
-        console.error(
-            "=========================================="
-        );
-
-
-        console.error(
-            "POPULAR.JS PREKIDA RAD."
-        );
-
-
-        console.error(
-            "=========================================="
-        );
-
-
-        process.exit(1);
-
-    }
 
 }
+
+
+
+
 
 
 /* =========================================================
-   START
+   RUN
 ========================================================= */
 
-createPopularJSONProcess();
+
+start();
