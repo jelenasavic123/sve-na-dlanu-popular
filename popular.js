@@ -676,77 +676,111 @@ function normalizePath(value){
 ========================================================= */
 
 
-function getIdFromQuery(value){
+function getIdFromQuery(value) {
 
+    if (!value) {
+        return "";
+    }
 
-    try{
+    try {
 
+        let text = String(value).trim();
 
-        const index =
-            value.indexOf("?");
+        /*
+         * Ako postoji URL:
+         * https://nadlanu.online/series/?id=xxx
+         */
+        if (
+            text.startsWith("http://") ||
+            text.startsWith("https://")
+        ) {
 
+            const url = new URL(text);
 
-        if(index === -1){
-
-            return "";
+            text =
+                url.pathname +
+                url.search;
 
         }
 
+        /*
+         * Uzmi deo posle prvog ?
+         */
+        const questionIndex =
+            text.indexOf("?");
 
+        if (questionIndex === -1) {
+            return "";
+        }
 
-        const params =
-            new URLSearchParams(
-                value.substring(index+1)
+        let query =
+            text.substring(
+                questionIndex + 1
             );
 
+        /*
+         * POPRAVKA:
+         *
+         * Ako GA4 vrati:
+         *
+         * ?id=serija?id=serija
+         *
+         * uzimamo samo prvi deo.
+         */
+        const duplicateQueryIndex =
+            query.indexOf("?");
 
+        if (duplicateQueryIndex !== -1) {
+
+            query =
+                query.substring(
+                    0,
+                    duplicateQueryIndex
+                );
+
+        }
+
+        const params =
+            new URLSearchParams(query);
 
         const keys = [
-
             "id",
             "series",
             "seriesId",
             "slug",
             "post",
             "postId"
-
         ];
 
-
-
-        for(
-            const key of keys
-        ){
-
+        for (const key of keys) {
 
             const result =
                 params.get(key);
 
-
-
-            if(result){
+            if (result) {
 
                 return String(result)
+                    .split("?")[0]
+                    .split("&")[0]
                     .trim()
                     .toLowerCase();
 
             }
 
-
         }
 
+    }
+    catch (e) {
 
+        console.log(
+            "Greska pri citanju ID-a:",
+            value
+        );
 
     }
-    catch(e){}
-
-
 
     return "";
-
-
 }
-
 
 
 
