@@ -1,223 +1,608 @@
 {
-    "today": [],
-    "last30Days": [
+    "today": [
         {
-            "id": "ayse",
-            "views": 153
+            "id": "sudbinom-povezani-arafta",
+            "views": 98
         },
         {
-            "id": "doktor-baska-hayatta-doktor-u-drugom-zivotu",
-            "views": 28
+            "id": "daha-on-yedi-samo-17",
+            "views": 95
         },
         {
-            "id": "50m2",
-            "views": 28
-        },
-        {
-            "id": "crne-beretke-siyah-bere",
-            "views": 12
-        },
-        {
-            "id": "sudbina-moje-cerke-goc-zamani",
-            "views": 4
-        },
-        {
-            "id": "detinjstvo-cocukluk",
-            "views": 4
-        },
-        {
-            "id": "budjenje-velikog-seldzuka-uyanis-buyuk-selcuklu",
-            "views": 3
-        },
-        {
-            "id": "falsifikator-kalpazan",
-            "views": 3
-        },
-        {
-            "id": "osmeh-gulumse-yeter",
-            "views": 3
-        },
-        {
-            "id": "akinci",
-            "views": 2
-        },
-        {
-            "id": "deca-sestara-kardes-cocuklari",
-            "views": 2
-        },
-        {
-            "id": "bekstvo-beg-kacis",
-            "views": 1
-        },
-        {
-            "id": "crna-ruza-karagul",
-            "views": 1
-        },
-        {
-            "id": "crna-zima-kara-kis",
-            "views": 1
-        },
-        {
-            "id": "jedan-od-nas-icimizden-biri",
-            "views": 1
-        },
-        {
-            "id": "jedna-nocna-prica-bir-gece-masali",
-            "views": 1
-        },
-        {
-            "id": "melekina-ljubav-meleklerin-aski",
-            "views": 1
-        },
-        {
-            "id": "moj-dom-zejnep-dogdugun-ev-kaderindir",
-            "views": 1
-        },
-        {
-            "id": "nasa-tajna-ikimizin-sirri",
-            "views": 1
-        },
-        {
-            "id": "neprijatelj-ljubavi-aska-dusman",
-            "views": 1
-        },
-        {
-            "id": "otkucaj-srca-kalp-atisi",
-            "views": 1
-        },
-        {
-            "id": "prljava-igra-oyunbozan",
-            "views": 1
-        },
-        {
-            "id": "sakrio-sam-te-u-srcu-seni-kalbime-saklad-m",
-            "views": 1
-        },
-        {
-            "id": "sandokan",
-            "views": 1
+            "id": "moguca-ljubav-muhtemel-ask",
+            "views": 92
         },
         {
             "id": "zakoni-prirode-doganin-kanunu",
-            "views": 1
+            "views": 59
         },
         {
-            "id": "zemlja-bez-zakona-kanunsuz-toprakla",
-            "views": 1
+            "id": "daleki-grad-uzak-sehir",
+            "views": 52
         },
         {
-            "id": "rat-ruza-gullerin-savasi",
-            "views": 1
+            "id": "iznad-i-ispod-istanbula-alti-ustu-istanbul",
+            "views": 49
+        },
+        {
+            "id": "naslednik-zov-korena-halef-koklerin-cagrisi",
+            "views": 48
+        },
+        {
+            "id": "ruze-i-grehovi-guller-ve-gunahlar-tajne-proslosti",
+            "views": 40
+        },
+        {
+            "id": "doktor-baska-hayatta-doktor-u-drugom-zivotu",
+            "views": 32
+        },
+        {
+            "id": "ti-si-ona-koju-volim-sevdigim-sensin",
+            "views": 31
+        },
+        {
+            "id": "pokucaj-na-moja-vrata-sen-cam-kamimi",
+            "views": 26
+        },
+        {
+            "id": "ayse",
+            "views": 25
+        },
+        {
+            "id": "esrefov-san-esref-ruya",
+            "views": 25
+        },
+        {
+            "id": "sanjalica-ptica-ranoranilica-erkenci-kus",
+            "views": 23
+        },
+        {
+            "id": "podzemlje-yeralti",
+            "views": 22
+        },
+        {
+            "id": "vetroviti-breg-ruzgarli-tepe-sudbina-vetrovi-ljubavi",
+            "views": 21
+        },
+        {
+            "id": "caj-od-brusnice-mostovi-zivota-kizilcik-serbeti-jedina-ljubav",
+            "views": 19
+        },
+        {
+            "id": "ljubav-koja-donosi-suze-ask-aglatir",
+            "views": 16
+        },
+        {
+            "id": "ovo-more-ce-se-preliti-tasacak-bu-deniz",
+            "views": 16
+        },
+        {
+            "id": "crna-zima-kara-kis",
+            "views": 15
+        },
+        {
+            "id": "nevesta-klopka-ljubavi-gelin",
+            "views": 15
+        },
+        {
+            "id": "osnivac-orhan-kurulus-orhan",
+            "views": 15
+        },
+        {
+            "id": "50m2",
+            "views": 14
+        },
+        {
+            "id": "crno-more-ispricaj-im-ti-njena-sudbina-sen-anlat-karadeniz",
+            "views": 13
+        },
+        {
+            "id": "kiskanmak-ljubomora",
+            "views": 13
+        },
+        {
+            "id": "ljubav-logika-osveta-ask-mantik-intikam",
+            "views": 13
+        },
+        {
+            "id": "mladic-delikanli",
+            "views": 13
+        },
+        {
+            "id": "iznajmljena-ljubav-kiral-k-ask",
+            "views": 12
+        },
+        {
+            "id": "kuma-druga-zena",
+            "views": 11
+        },
+        {
+            "id": "ah-gde-ah-nerede",
+            "views": 11
+        },
+        {
+            "id": "crne-beretke-siyah-bere",
+            "views": 11
+        },
+        {
+            "id": "detinjstvo-cocukluk",
+            "views": 11
+        },
+        {
+            "id": "istanbulska-nevesta-istanbullu-gelin-instambulska-nevesta",
+            "views": 11
+        },
+        {
+            "id": "pun-mesec-dolunay",
+            "views": 11
+        },
+        {
+            "id": "bekstvo-beg-kacis",
+            "views": 10
+        },
+        {
+            "id": "budjenje-velikog-seldzuka-uyanis-buyuk-selcuklu",
+            "views": 10
+        },
+        {
+            "id": "golubica-guvercin",
+            "views": 10
+        },
+        {
+            "id": "porodica-je-iskusenje-abi",
+            "views": 10
+        },
+        {
+            "id": "cukurova-bir-zamanlar",
+            "views": 9
+        },
+        {
+            "id": "gavran-kuzgun-prevara",
+            "views": 9
+        },
+        {
+            "id": "kad-lisce-pada-yaprak-dokumu",
+            "views": 9
+        },
+        {
+            "id": "sakrio-sam-te-u-srcu-seni-kalbime-saklad-m",
+            "views": 9
+        },
+        {
+            "id": "zena-kadin",
+            "views": 9
+        },
+        {
+            "id": "abasadorova-kci-sefirin-k-z",
+            "views": 8
+        },
+        {
+            "id": "greh-njenog-oca-alaca",
+            "views": 8
+        },
+        {
+            "id": "velicanstveni-duo-muhtesem-ikili",
+            "views": 8
+        },
+        {
+            "id": "sezona-visnje-kiraz-mevsimi",
+            "views": 8
+        },
+        {
+            "id": "beskrajna-ljubav-kara-sevda",
+            "views": 8
+        },
+        {
+            "id": "nista-nam-se-nece-dogoditi-bize-bi-sey-olmaz",
+            "views": 8
+        },
+        {
+            "id": "susret-u-instambulu-bir-baskadir-ethos",
+            "views": 8
+        }
+    ],
+    "last30Days": [
+        {
+            "id": "ayse",
+            "views": 219
+        },
+        {
+            "id": "50m2",
+            "views": 113
+        },
+        {
+            "id": "doktor-baska-hayatta-doktor-u-drugom-zivotu",
+            "views": 86
+        },
+        {
+            "id": "daha-on-yedi-samo-17",
+            "views": 59
+        },
+        {
+            "id": "moguca-ljubav-muhtemel-ask",
+            "views": 56
+        },
+        {
+            "id": "sudbinom-povezani-arafta",
+            "views": 47
+        },
+        {
+            "id": "do-smrti-olene-kadar",
+            "views": 46
+        },
+        {
+            "id": "crne-beretke-siyah-bere",
+            "views": 32
+        },
+        {
+            "id": "1001-noc-binbir-gece",
+            "views": 29
+        },
+        {
+            "id": "daleki-grad-uzak-sehir",
+            "views": 27
+        },
+        {
+            "id": "naslednik-zov-korena-halef-koklerin-cagrisi",
+            "views": 24
+        },
+        {
+            "id": "crna-zima-kara-kis",
+            "views": 21
+        },
+        {
+            "id": "zakoni-prirode-doganin-kanunu",
+            "views": 21
+        },
+        {
+            "id": "iznad-i-ispod-istanbula-alti-ustu-istanbul",
+            "views": 21
+        },
+        {
+            "id": "ruze-i-grehovi-guller-ve-gunahlar-tajne-proslosti",
+            "views": 19
+        },
+        {
+            "id": "detinjstvo-cocukluk",
+            "views": 18
+        },
+        {
+            "id": "abasadorova-kci-sefirin-k-z",
+            "views": 17
+        },
+        {
+            "id": "ezel",
+            "views": 17
+        },
+        {
+            "id": "ah-gde-ah-nerede",
+            "views": 15
+        },
+        {
+            "id": "esrefov-san-esref-ruya",
+            "views": 14
+        },
+        {
+            "id": "ljubav-koja-donosi-suze-ask-aglatir",
+            "views": 14
+        },
+        {
+            "id": "budjenje-velikog-seldzuka-uyanis-buyuk-selcuklu",
+            "views": 13
+        },
+        {
+            "id": "jama-cukur",
+            "views": 13
+        },
+        {
+            "id": "sudbina-moje-cerke-goc-zamani",
+            "views": 12
+        },
+        {
+            "id": "asi",
+            "views": 11
+        },
+        {
+            "id": "podzemlje-yeralti",
+            "views": 11
+        },
+        {
+            "id": "kuma-druga-zena",
+            "views": 10
+        },
+        {
+            "id": "jasmine-yasemin",
+            "views": 10
+        },
+        {
+            "id": "osnivac-orhan-kurulus-orhan",
+            "views": 10
+        },
+        {
+            "id": "iznajmljena-ljubav-kiral-k-ask",
+            "views": 9
+        },
+        {
+            "id": "golubica-guvercin",
+            "views": 9
+        },
+        {
+            "id": "nevesta-klopka-ljubavi-gelin",
+            "views": 9
+        },
+        {
+            "id": "beskrajna-ljubav-kara-sevda",
+            "views": 8
+        },
+        {
+            "id": "sanjalica-ptica-ranoranilica-erkenci-kus",
+            "views": 8
+        },
+        {
+            "id": "bekstvo-beg-kacis",
+            "views": 7
+        },
+        {
+            "id": "zvezde-su-daleko-od-mene-yildizlar-bana-uzak",
+            "views": 7
+        },
+        {
+            "id": "akinci",
+            "views": 7
+        },
+        {
+            "id": "nista-nam-se-nece-dogoditi-bize-bi-sey-olmaz",
+            "views": 7
+        },
+        {
+            "id": "moj-dom-zejnep-dogdugun-ev-kaderindir",
+            "views": 6
+        },
+        {
+            "id": "deca-sestara-kardes-cocuklari",
+            "views": 6
+        },
+        {
+            "id": "falsifikator-kalpazan",
+            "views": 6
+        },
+        {
+            "id": "osmeh-gulumse-yeter",
+            "views": 6
+        },
+        {
+            "id": "ariza",
+            "views": 6
+        },
+        {
+            "id": "caj-od-brusnice-mostovi-zivota-kizilcik-serbeti-jedina-ljubav",
+            "views": 6
+        },
+        {
+            "id": "nedovrsena-ljubav-yar-m-kalan-asklar",
+            "views": 6
+        },
+        {
+            "id": "vetroviti-breg-ruzgarli-tepe-sudbina-vetrovi-ljubavi",
+            "views": 6
+        },
+        {
+            "id": "za-mog-sina-poyraz-karayel",
+            "views": 6
+        },
+        {
+            "id": "sakrio-sam-te-u-srcu-seni-kalbime-saklad-m",
+            "views": 5
+        },
+        {
+            "id": "ako-volis-previse-ya-cok-seversen",
+            "views": 5
+        },
+        {
+            "id": "apartman-nevinih-duhovi-proslosti-masumlar-apartmani",
+            "views": 5
         }
     ],
     "allTime": [
         {
             "id": "ayse",
-            "views": 153
-        },
-        {
-            "id": "doktor-baska-hayatta-doktor-u-drugom-zivotu",
-            "views": 28
+            "views": 236
         },
         {
             "id": "50m2",
-            "views": 28
+            "views": 117
         },
         {
-            "id": "crne-beretke-siyah-bere",
-            "views": 12
+            "id": "moguca-ljubav-muhtemel-ask",
+            "views": 110
         },
         {
-            "id": "sudbina-moje-cerke-goc-zamani",
-            "views": 4
+            "id": "daha-on-yedi-samo-17",
+            "views": 108
         },
         {
-            "id": "detinjstvo-cocukluk",
-            "views": 4
+            "id": "doktor-baska-hayatta-doktor-u-drugom-zivotu",
+            "views": 104
         },
         {
-            "id": "budjenje-velikog-seldzuka-uyanis-buyuk-selcuklu",
-            "views": 3
-        },
-        {
-            "id": "falsifikator-kalpazan",
-            "views": 3
-        },
-        {
-            "id": "osmeh-gulumse-yeter",
-            "views": 3
-        },
-        {
-            "id": "akinci",
-            "views": 2
-        },
-        {
-            "id": "deca-sestara-kardes-cocuklari",
-            "views": 2
-        },
-        {
-            "id": "bekstvo-beg-kacis",
-            "views": 1
-        },
-        {
-            "id": "crna-ruza-karagul",
-            "views": 1
-        },
-        {
-            "id": "crna-zima-kara-kis",
-            "views": 1
-        },
-        {
-            "id": "jedan-od-nas-icimizden-biri",
-            "views": 1
-        },
-        {
-            "id": "jedna-nocna-prica-bir-gece-masali",
-            "views": 1
-        },
-        {
-            "id": "melekina-ljubav-meleklerin-aski",
-            "views": 1
-        },
-        {
-            "id": "moj-dom-zejnep-dogdugun-ev-kaderindir",
-            "views": 1
-        },
-        {
-            "id": "nasa-tajna-ikimizin-sirri",
-            "views": 1
-        },
-        {
-            "id": "neprijatelj-ljubavi-aska-dusman",
-            "views": 1
-        },
-        {
-            "id": "otkucaj-srca-kalp-atisi",
-            "views": 1
-        },
-        {
-            "id": "prljava-igra-oyunbozan",
-            "views": 1
-        },
-        {
-            "id": "sakrio-sam-te-u-srcu-seni-kalbime-saklad-m",
-            "views": 1
-        },
-        {
-            "id": "sandokan",
-            "views": 1
+            "id": "sudbinom-povezani-arafta",
+            "views": 101
         },
         {
             "id": "zakoni-prirode-doganin-kanunu",
-            "views": 1
+            "views": 60
         },
         {
-            "id": "zemlja-bez-zakona-kanunsuz-toprakla",
-            "views": 1
+            "id": "daleki-grad-uzak-sehir",
+            "views": 52
         },
         {
-            "id": "rat-ruza-gullerin-savasi",
-            "views": 1
+            "id": "iznad-i-ispod-istanbula-alti-ustu-istanbul",
+            "views": 50
+        },
+        {
+            "id": "naslednik-zov-korena-halef-koklerin-cagrisi",
+            "views": 48
+        },
+        {
+            "id": "do-smrti-olene-kadar",
+            "views": 46
+        },
+        {
+            "id": "ruze-i-grehovi-guller-ve-gunahlar-tajne-proslosti",
+            "views": 40
+        },
+        {
+            "id": "crne-beretke-siyah-bere",
+            "views": 38
+        },
+        {
+            "id": "1001-noc-binbir-gece",
+            "views": 34
+        },
+        {
+            "id": "ti-si-ona-koju-volim-sevdigim-sensin",
+            "views": 31
+        },
+        {
+            "id": "crna-zima-kara-kis",
+            "views": 28
+        },
+        {
+            "id": "pokucaj-na-moja-vrata-sen-cam-kamimi",
+            "views": 26
+        },
+        {
+            "id": "esrefov-san-esref-ruya",
+            "views": 25
+        },
+        {
+            "id": "detinjstvo-cocukluk",
+            "views": 24
+        },
+        {
+            "id": "podzemlje-yeralti",
+            "views": 23
+        },
+        {
+            "id": "sanjalica-ptica-ranoranilica-erkenci-kus",
+            "views": 23
+        },
+        {
+            "id": "abasadorova-kci-sefirin-k-z",
+            "views": 22
+        },
+        {
+            "id": "vetroviti-breg-ruzgarli-tepe-sudbina-vetrovi-ljubavi",
+            "views": 21
+        },
+        {
+            "id": "ah-gde-ah-nerede",
+            "views": 19
+        },
+        {
+            "id": "caj-od-brusnice-mostovi-zivota-kizilcik-serbeti-jedina-ljubav",
+            "views": 19
+        },
+        {
+            "id": "ezel",
+            "views": 17
+        },
+        {
+            "id": "ljubav-koja-donosi-suze-ask-aglatir",
+            "views": 16
+        },
+        {
+            "id": "osnivac-orhan-kurulus-orhan",
+            "views": 16
+        },
+        {
+            "id": "ovo-more-ce-se-preliti-tasacak-bu-deniz",
+            "views": 16
+        },
+        {
+            "id": "nevesta-klopka-ljubavi-gelin",
+            "views": 15
+        },
+        {
+            "id": "sudbina-moje-cerke-goc-zamani",
+            "views": 14
+        },
+        {
+            "id": "budjenje-velikog-seldzuka-uyanis-buyuk-selcuklu",
+            "views": 14
+        },
+        {
+            "id": "mladic-delikanli",
+            "views": 14
+        },
+        {
+            "id": "crno-more-ispricaj-im-ti-njena-sudbina-sen-anlat-karadeniz",
+            "views": 13
+        },
+        {
+            "id": "jama-cukur",
+            "views": 13
+        },
+        {
+            "id": "kiskanmak-ljubomora",
+            "views": 13
+        },
+        {
+            "id": "ljubav-logika-osveta-ask-mantik-intikam",
+            "views": 13
+        },
+        {
+            "id": "bekstvo-beg-kacis",
+            "views": 12
+        },
+        {
+            "id": "iznajmljena-ljubav-kiral-k-ask",
+            "views": 12
+        },
+        {
+            "id": "asi",
+            "views": 12
+        },
+        {
+            "id": "jasmine-yasemin",
+            "views": 12
+        },
+        {
+            "id": "kuma-druga-zena",
+            "views": 11
+        },
+        {
+            "id": "akinci",
+            "views": 11
+        },
+        {
+            "id": "istanbulska-nevesta-istanbullu-gelin-instambulska-nevesta",
+            "views": 11
+        },
+        {
+            "id": "pun-mesec-dolunay",
+            "views": 11
+        },
+        {
+            "id": "sakrio-sam-te-u-srcu-seni-kalbime-saklad-m",
+            "views": 10
+        },
+        {
+            "id": "cukurova-bir-zamanlar",
+            "views": 10
+        },
+        {
+            "id": "deca-sestara-kardes-cocuklari",
+            "views": 10
+        },
+        {
+            "id": "falsifikator-kalpazan",
+            "views": 10
+        },
+        {
+            "id": "osmeh-gulumse-yeter",
+            "views": 10
         }
     ]
 }
