@@ -1,151 +1,147 @@
 {
     "today": [
         {
-            "id": "daleki-grad-uzak-sehir",
-            "views": 6916
-        },
-        {
             "id": "ruze-i-grehovi-guller-ve-gunahlar-tajne-proslosti",
-            "views": 5912
+            "views": 6384
         },
         {
-            "id": "vrata-ljubavi-sevdan-bir-ates",
-            "views": 3431
-        },
-        {
-            "id": "podzemlje-yeralti",
-            "views": 2891
-        },
-        {
-            "id": "druga-majka-anne-yarisi",
-            "views": 2736
+            "id": "daleki-grad-uzak-sehir",
+            "views": 5952
         },
         {
             "id": "moguca-ljubav-muhtemel-ask",
-            "views": 2598
+            "views": 4517
         },
         {
             "id": "ti-si-ona-koju-volim-sevdigim-sensin",
-            "views": 2368
+            "views": 3150
         },
         {
-            "id": "naslednik-zov-korena-halef-koklerin-cagrisi",
-            "views": 1498
+            "id": "vrata-ljubavi-sevdan-bir-ates",
+            "views": 2796
         },
         {
-            "id": "majstor-omur-omur-usta",
-            "views": 1414
+            "id": "druga-majka-anne-yarisi",
+            "views": 2303
         },
         {
             "id": "ovo-more-ce-se-preliti-tasacak-bu-deniz",
-            "views": 1337
+            "views": 2278
         },
         {
-            "id": "gde-sunce-izlazi-devojke-sunca-gunesin-dogdugu-yer",
-            "views": 1253
+            "id": "naslednik-zov-korena-halef-koklerin-cagrisi",
+            "views": 2080
         },
         {
-            "id": "daha-on-yedi-samo-17",
-            "views": 1106
-        },
-        {
-            "id": "sudbinom-povezani-arafta",
-            "views": 1079
-        },
-        {
-            "id": "zivoti-drugih-baskalarinin-hayat",
-            "views": 934
+            "id": "podzemlje-yeralti",
+            "views": 2027
         },
         {
             "id": "caj-od-brusnice-mostovi-zivota-kizilcik-serbeti-jedina-ljubav",
-            "views": 895
+            "views": 1759
         },
         {
-            "id": "iznad-i-ispod-istanbula-alti-ustu-istanbul",
-            "views": 756
+            "id": "gde-sunce-izlazi-devojke-sunca-gunesin-dogdugu-yer",
+            "views": 1659
         },
         {
-            "id": "dostojanstvo-haysiyet",
-            "views": 736
+            "id": "sudbinom-povezani-arafta",
+            "views": 1346
+        },
+        {
+            "id": "majstor-omur-omur-usta",
+            "views": 1313
+        },
+        {
+            "id": "daha-on-yedi-samo-17",
+            "views": 1140
+        },
+        {
+            "id": "zivoti-drugih-baskalarinin-hayat",
+            "views": 979
         },
         {
             "id": "crno-srce-siyah-kalp-pod-istim-nebom",
-            "views": 705
+            "views": 804
         },
         {
             "id": "nevesta-klopka-ljubavi-gelin",
-            "views": 643
+            "views": 670
+        },
+        {
+            "id": "iznad-i-ispod-istanbula-alti-ustu-istanbul",
+            "views": 668
         },
         {
             "id": "istanbulska-nevesta-istanbullu-gelin-instambulska-nevesta",
-            "views": 599
+            "views": 576
+        },
+        {
+            "id": "dostojanstvo-haysiyet",
+            "views": 505
         },
         {
             "id": "esrefov-san-esref-ruya",
-            "views": 440
+            "views": 499
         },
         {
             "id": "sanjalica-ptica-ranoranilica-erkenci-kus",
-            "views": 432
+            "views": 470
         },
         {
             "id": "moja-ljubav-je-crno-more-sevdam-karadeniz",
-            "views": 382
-        },
-        {
-            "id": "brak-je-predivan-evlilik-guzeldir",
-            "views": 373
-        },
-        {
-            "id": "divlji-yabani",
-            "views": 353
-        },
-        {
-            "id": "koralna-vila-koralna-palata-mercan-kosk",
-            "views": 341
+            "views": 386
         },
         {
             "id": "pokucaj-na-moja-vrata-sen-cam-kamimi",
-            "views": 288
+            "views": 344
+        },
+        {
+            "id": "divlji-yabani",
+            "views": 343
+        },
+        {
+            "id": "koralna-vila-koralna-palata-mercan-kosk",
+            "views": 316
+        },
+        {
+            "id": "brak-je-predivan-evlilik-guzeldir",
+            "views": 300
         },
         {
             "id": "crveno-crno-alikara",
-            "views": 247
+            "views": 223
         },
         {
             "id": "vodomar-zenkaros-iz-vile-yali-capkin",
-            "views": 232
-        },
-        {
-            "id": "mehmed-sultanova-osvajanja-mehmed-fetihler-sultani",
-            "views": 200
-        },
-        {
-            "id": "pun-mesec-dolunay",
-            "views": 168
+            "views": 202
         },
         {
             "id": "porodica-je-iskusenje-abi",
-            "views": 167
+            "views": 173
         },
         {
-            "id": "ljubav-logika-osveta-ask-mantik-intikam",
-            "views": 166
-        },
-        {
-            "id": "organizacija-teskilat",
-            "views": 164
-        },
-        {
-            "id": "slana-kafa-tuzlu-kahve",
-            "views": 159
+            "id": "gospodja-fazilet-i-njene-kceri-cerke-fazilet-hanim-ve-kizlari",
+            "views": 163
         },
         {
             "id": "kad-lisce-pada-yaprak-dokumu",
-            "views": 157
+            "views": 160
         },
         {
-            "id": "zakoni-prirode-doganin-kanunu",
+            "id": "beskrajna-ljubav-kara-sevda",
+            "views": 158
+        },
+        {
+            "id": "pun-mesec-dolunay",
+            "views": 155
+        },
+        {
+            "id": "mehmed-sultanova-osvajanja-mehmed-fetihler-sultani",
+            "views": 150
+        },
+        {
+            "id": "ljubav-logika-osveta-ask-mantik-intikam",
             "views": 147
         },
         {
@@ -153,456 +149,460 @@
             "views": 142
         },
         {
-            "id": "beskrajna-ljubav-kara-sevda",
-            "views": 141
+            "id": "andjeli-ranjivo-cvijece-kirgin-cicekler",
+            "views": 133
         },
         {
-            "id": "crno-bela-ljubav-siyah-beyaz-ask",
-            "views": 133
+            "id": "organizacija-teskilat",
+            "views": 127
+        },
+        {
+            "id": "slana-kafa-tuzlu-kahve",
+            "views": 126
         },
         {
             "id": "ambasadorova-kci-sefirin-kizi",
-            "views": 133
-        },
-        {
-            "id": "gospodja-fazilet-i-njene-kceri-cerke-fazilet-hanim-ve-kizlari",
-            "views": 130
-        },
-        {
-            "id": "iznajmljena-ljubav-kiralik-ask",
-            "views": 121
-        },
-        {
-            "id": "andjeli-ranjivo-cvijece-kirgin-cicekler",
-            "views": 119
-        },
-        {
-            "id": "ja-sam-aylamaz-benim-adim-aylamaz",
             "views": 118
         },
         {
-            "id": "miris-jagoda-cilek-kokusu",
+            "id": "zakoni-prirode-doganin-kanunu",
             "views": 114
         },
         {
+            "id": "iznajmljena-ljubav-kiralik-ask",
+            "views": 110
+        },
+        {
+            "id": "crno-bela-ljubav-siyah-beyaz-ask",
+            "views": 108
+        },
+        {
+            "id": "prevrtljivo-srce-hercai",
+            "views": 107
+        },
+        {
             "id": "crno-more-ispricaj-im-ti-njena-sudbina-sen-anlat-karadeniz",
-            "views": 103
+            "views": 105
         },
         {
-            "id": "gospodin-pogresni-bay-yanlis",
-            "views": 93
+            "id": "paramparcad-tudji-zivot-paramparca",
+            "views": 98
         },
         {
-            "id": "sumud",
+            "id": "ljubav-na-pomolu-afili-ask",
+            "views": 95
+        },
+        {
+            "id": "ja-sam-aylamaz-benim-adim-aylamaz",
+            "views": 94
+        },
+        {
+            "id": "miris-jagoda-cilek-kokusu",
             "views": 92
-        },
-        {
-            "id": "ako-volis-previse-ya-cok-seversen",
-            "views": 89
         }
     ],
     "last30Days": [
         {
             "id": "ruze-i-grehovi-guller-ve-gunahlar-tajne-proslosti",
-            "views": 220296
+            "views": 220234
         },
         {
             "id": "daleki-grad-uzak-sehir",
-            "views": 177538
+            "views": 176417
         },
         {
             "id": "moguca-ljubav-muhtemel-ask",
-            "views": 75930
-        },
-        {
-            "id": "druga-majka-anne-yarisi",
-            "views": 53367
+            "views": 78018
         },
         {
             "id": "ti-si-ona-koju-volim-sevdigim-sensin",
-            "views": 52759
+            "views": 54084
+        },
+        {
+            "id": "druga-majka-anne-yarisi",
+            "views": 52509
         },
         {
             "id": "majstor-omur-omur-usta",
-            "views": 46227
+            "views": 46318
         },
         {
             "id": "ovo-more-ce-se-preliti-tasacak-bu-deniz",
-            "views": 44287
+            "views": 44740
         },
         {
             "id": "podzemlje-yeralti",
-            "views": 40359
+            "views": 41101
         },
         {
             "id": "vrata-ljubavi-sevdan-bir-ates",
-            "views": 38317
+            "views": 39544
         },
         {
             "id": "naslednik-zov-korena-halef-koklerin-cagrisi",
-            "views": 34510
+            "views": 35422
         },
         {
             "id": "daha-on-yedi-samo-17",
-            "views": 33466
+            "views": 33420
         },
         {
             "id": "caj-od-brusnice-mostovi-zivota-kizilcik-serbeti-jedina-ljubav",
-            "views": 32291
+            "views": 32669
         },
         {
             "id": "sudbinom-povezani-arafta",
-            "views": 29204
+            "views": 29088
         },
         {
             "id": "gde-sunce-izlazi-devojke-sunca-gunesin-dogdugu-yer",
-            "views": 27750
+            "views": 28408
         },
         {
             "id": "zivoti-drugih-baskalarinin-hayat",
-            "views": 26601
+            "views": 26839
         },
         {
             "id": "iznad-i-ispod-istanbula-alti-ustu-istanbul",
-            "views": 21701
+            "views": 21228
         },
         {
             "id": "moja-ljubav-je-crno-more-sevdam-karadeniz",
-            "views": 21081
+            "views": 20669
         },
         {
             "id": "dostojanstvo-haysiyet",
-            "views": 13889
+            "views": 13594
         },
         {
             "id": "istanbulska-nevesta-istanbullu-gelin-instambulska-nevesta",
-            "views": 13666
-        },
-        {
-            "id": "esrefov-san-esref-ruya",
-            "views": 12771
+            "views": 13553
         },
         {
             "id": "crno-srce-siyah-kalp-pod-istim-nebom",
-            "views": 12338
+            "views": 12721
         },
         {
-            "id": "sanjalica-ptica-ranoranilica-erkenci-kus",
-            "views": 12279
+            "id": "esrefov-san-esref-ruya",
+            "views": 12683
         },
         {
             "id": "nevesta-klopka-ljubavi-gelin",
-            "views": 12224
+            "views": 12415
+        },
+        {
+            "id": "sanjalica-ptica-ranoranilica-erkenci-kus",
+            "views": 12120
         },
         {
             "id": "koralna-vila-koralna-palata-mercan-kosk",
-            "views": 11263
+            "views": 10996
         },
         {
             "id": "pokucaj-na-moja-vrata-sen-cam-kamimi",
-            "views": 9777
+            "views": 9709
         },
         {
             "id": "brak-je-predivan-evlilik-guzeldir",
-            "views": 8863
+            "views": 8808
         },
         {
             "id": "divlji-yabani",
-            "views": 8511
+            "views": 8619
         },
         {
             "id": "crveno-crno-alikara",
-            "views": 6387
+            "views": 6270
         },
         {
             "id": "porodica-je-iskusenje-abi",
-            "views": 5637
+            "views": 5493
         },
         {
             "id": "vodomar-zenkaros-iz-vile-yali-capkin",
-            "views": 5251
+            "views": 5249
         },
         {
             "id": "pun-mesec-dolunay",
-            "views": 5150
+            "views": 5059
         },
         {
             "id": "zakoni-prirode-doganin-kanunu",
-            "views": 4661
+            "views": 4571
         },
         {
             "id": "slana-kafa-tuzlu-kahve",
-            "views": 4615
+            "views": 4496
         },
         {
             "id": "organizacija-teskilat",
-            "views": 4037
+            "views": 4036
         },
         {
             "id": "ljubav-logika-osveta-ask-mantik-intikam",
-            "views": 4015
+            "views": 3949
         },
         {
             "id": "kad-lisce-pada-yaprak-dokumu",
-            "views": 3920
+            "views": 3930
         },
         {
             "id": "vetroviti-breg-ruzgarli-tepe-sudbina-vetrovi-ljubavi",
-            "views": 3728
+            "views": 3688
         },
         {
             "id": "beskrajna-ljubav-kara-sevda",
-            "views": 3430
+            "views": 3436
         },
         {
             "id": "crno-bela-ljubav-siyah-beyaz-ask",
-            "views": 3167
+            "views": 3176
         },
         {
             "id": "sumud",
-            "views": 3095
+            "views": 3164
         },
         {
             "id": "ambasadorova-kci-sefirin-kizi",
-            "views": 2802
+            "views": 2844
         },
         {
             "id": "ja-sam-aylamaz-benim-adim-aylamaz",
-            "views": 2717
+            "views": 2714
         },
         {
             "id": "ayse",
-            "views": 2685
+            "views": 2635
         },
         {
             "id": "zivot-leyla",
-            "views": 2627
-        },
-        {
-            "id": "bezgranicna-ljubav-hudutsuz-sevda",
-            "views": 2467
+            "views": 2603
         },
         {
             "id": "andjeli-ranjivo-cvijece-kirgin-cicekler",
-            "views": 2435
+            "views": 2466
         },
         {
             "id": "iznajmljena-ljubav-kiralik-ask",
-            "views": 2434
-        },
-        {
-            "id": "ljubav-na-pomolu-afili-ask",
-            "views": 2412
+            "views": 2453
         },
         {
             "id": "gospodja-fazilet-i-njene-kceri-cerke-fazilet-hanim-ve-kizlari",
-            "views": 2364
+            "views": 2432
+        },
+        {
+            "id": "ljubav-na-pomolu-afili-ask",
+            "views": 2402
+        },
+        {
+            "id": "bezgranicna-ljubav-hudutsuz-sevda",
+            "views": 2355
         },
         {
             "id": "paramparcad-tudji-zivot-paramparca",
-            "views": 2349
+            "views": 2355
         }
     ],
     "allTime": [
         {
             "id": "ruze-i-grehovi-guller-ve-gunahlar-tajne-proslosti",
-            "views": 449977
+            "views": 455294
         },
         {
             "id": "daleki-grad-uzak-sehir",
-            "views": 382479
+            "views": 387297
         },
         {
             "id": "moguca-ljubav-muhtemel-ask",
-            "views": 196025
+            "views": 199590
         },
         {
             "id": "ti-si-ona-koju-volim-sevdigim-sensin",
-            "views": 120183
+            "views": 122538
         },
         {
             "id": "daha-on-yedi-samo-17",
-            "views": 91549
+            "views": 92469
         },
         {
             "id": "naslednik-zov-korena-halef-koklerin-cagrisi",
-            "views": 83916
+            "views": 85647
         },
         {
             "id": "sudbinom-povezani-arafta",
-            "views": 82904
+            "views": 84021
         },
         {
             "id": "druga-majka-anne-yarisi",
-            "views": 78039
+            "views": 79876
         },
         {
             "id": "ovo-more-ce-se-preliti-tasacak-bu-deniz",
-            "views": 74452
+            "views": 76449
         },
         {
             "id": "vrata-ljubavi-sevdan-bir-ates",
-            "views": 72071
+            "views": 74135
         },
         {
             "id": "iznad-i-ispod-istanbula-alti-ustu-istanbul",
-            "views": 65008
+            "views": 65534
         },
         {
             "id": "majstor-omur-omur-usta",
-            "views": 63144
+            "views": 64222
         },
         {
             "id": "podzemlje-yeralti",
-            "views": 61678
+            "views": 63288
         },
         {
             "id": "caj-od-brusnice-mostovi-zivota-kizilcik-serbeti-jedina-ljubav",
-            "views": 60834
+            "views": 62404
         },
         {
             "id": "gde-sunce-izlazi-devojke-sunca-gunesin-dogdugu-yer",
-            "views": 48022
+            "views": 49289
         },
         {
             "id": "sanjalica-ptica-ranoranilica-erkenci-kus",
-            "views": 46586
+            "views": 46977
         },
         {
             "id": "esrefov-san-esref-ruya",
-            "views": 41125
+            "views": 41531
         },
         {
             "id": "istanbulska-nevesta-istanbullu-gelin-instambulska-nevesta",
-            "views": 38610
+            "views": 39073
         },
         {
             "id": "koralna-vila-koralna-palata-mercan-kosk",
-            "views": 36454
+            "views": 36719
         },
         {
             "id": "pokucaj-na-moja-vrata-sen-cam-kamimi",
-            "views": 35604
+            "views": 35901
         },
         {
             "id": "zivoti-drugih-baskalarinin-hayat",
-            "views": 34969
+            "views": 35784
         },
         {
             "id": "zakoni-prirode-doganin-kanunu",
-            "views": 31183
+            "views": 31277
         },
         {
             "id": "dostojanstvo-haysiyet",
-            "views": 29526
+            "views": 29946
         },
         {
             "id": "nevesta-klopka-ljubavi-gelin",
-            "views": 25935
+            "views": 26487
         },
         {
             "id": "porodica-je-iskusenje-abi",
-            "views": 24662
+            "views": 24801
         },
         {
             "id": "moja-ljubav-je-crno-more-sevdam-karadeniz",
-            "views": 22005
+            "views": 22332
         },
         {
             "id": "brak-je-predivan-evlilik-guzeldir",
-            "views": 20178
+            "views": 20415
         },
         {
             "id": "crno-srce-siyah-kalp-pod-istim-nebom",
-            "views": 19050
+            "views": 19743
         },
         {
             "id": "ljubav-logika-osveta-ask-mantik-intikam",
-            "views": 17454
+            "views": 17572
         },
         {
             "id": "vodomar-zenkaros-iz-vile-yali-capkin",
-            "views": 17091
+            "views": 17254
         },
         {
             "id": "crveno-crno-alikara",
-            "views": 16590
+            "views": 16788
         },
         {
             "id": "pun-mesec-dolunay",
-            "views": 15664
+            "views": 15788
         },
         {
             "id": "vetroviti-breg-ruzgarli-tepe-sudbina-vetrovi-ljubavi",
-            "views": 13262
+            "views": 13381
         },
         {
             "id": "ruzan-cirkin-ruzna",
-            "views": 13076
+            "views": 13121
         },
         {
             "id": "divlji-yabani",
-            "views": 12061
+            "views": 12344
         },
         {
             "id": "bezgranicna-ljubav-hudutsuz-sevda",
-            "views": 11900
+            "views": 11962
         },
         {
             "id": "slana-kafa-tuzlu-kahve",
-            "views": 11773
+            "views": 11871
         },
         {
             "id": "kad-lisce-pada-yaprak-dokumu",
-            "views": 9033
+            "views": 9170
         },
         {
             "id": "crno-more-ispricaj-im-ti-njena-sudbina-sen-anlat-karadeniz",
-            "views": 8727
-        },
-        {
-            "id": "organizacija-teskilat",
-            "views": 8051
-        },
-        {
-            "id": "zivot-leyla",
-            "views": 8047
+            "views": 8808
         },
         {
             "id": "beskrajna-ljubav-kara-sevda",
-            "views": 8044
+            "views": 8178
+        },
+        {
+            "id": "organizacija-teskilat",
+            "views": 8149
+        },
+        {
+            "id": "zivot-leyla",
+            "views": 8110
         },
         {
             "id": "gospodin-pogresni-bay-yanlis",
-            "views": 7953
+            "views": 8032
         },
         {
             "id": "crno-bela-ljubav-siyah-beyaz-ask",
-            "views": 7620
+            "views": 7705
         },
         {
             "id": "doktor-baska-hayatta-doktor-u-drugom-zivotu",
-            "views": 7313
+            "views": 7380
         },
         {
             "id": "ja-sam-aylamaz-benim-adim-aylamaz",
-            "views": 7253
+            "views": 7328
         },
         {
             "id": "ayse",
-            "views": 7213
+            "views": 7270
         },
         {
             "id": "ljubav-na-pomolu-afili-ask",
-            "views": 6949
+            "views": 7036
         },
         {
             "id": "ljubav-i-presto-ask-ve-taht",
-            "views": 6862
+            "views": 6916
         },
         {
             "id": "cukurova-bir-zamanlar",
-            "views": 6745
+            "views": 6808
         }
     ]
 }
